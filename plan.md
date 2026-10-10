@@ -55,3 +55,7 @@ Le fichier `client/public/data/depots_sauvages_corrige.geojson` est une copie bi
 Le fichier `client/public/data/Arrondissements_Bohicon.geojson` est conservé à l’identique. Il contient **10 MultiPolygon** en **EPSG:32631 / UTM zone 31N**. Pour la projection de la carte, `Arrondissements_Bohicon_wgs84.geojson` est généré en **EPSG:4326**, avec la mention `sourceCrs`/`displayCrs` et sans remplacer la source. Les 10 limites sont visibles comme couche administrative indépendante.
 
 Le contrôle spatial place les **188 dépôts dans une limite**. Il relève **63 écarts** entre l’arrondissement textuel déclaré dans la fiche de dépôt et l’arrondissement déterminé par le polygone. Ces écarts sont conservés comme qualité de donnée à examiner : l’application ne réécrit pas silencieusement l’attribut source.
+
+## Fond cartographique
+
+La carte opérationnelle utilise Leaflet avec un fond OpenStreetMap France. Pour garantir le fonctionnement de l’aperçu malgré le blocage des tuiles publiques dans certains navigateurs, une mosaïque locale OSM couvrant Bohicon est servie depuis `client/public/data/osm/bohicon-z13-mosaic.jpg`; l’attribution OpenStreetMap reste affichée. Les polygones SVG et les marqueurs fictifs ont été retirés. L’état initial et l’ancien stockage de démonstration ont été purgés : seules les couches terrain reçues, les saisies utilisateur et les résultats calculés sont conservés.
