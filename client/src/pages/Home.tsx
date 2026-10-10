@@ -69,7 +69,7 @@ import {
   persistState,
   terrainReportsFromGeoJSON,
 } from "@/lib/demo";
-import { flattenCoordinates, inspectionSummary, inspectGeoJSON, type GeoInspection } from "@/lib/geojson";
+import { flattenCoordinates, inspectionSummary, inspectGeoJSON, normalizeGeoJSONForDisplay, type GeoInspection } from "@/lib/geojson";
 
  type Role = "public" | "citizen" | "collector" | "mairie" | "admin";
  type ViewKey = "overview" | "report" | "reports" | "points" | "rewards" | "map" | "training" | "collection" | "history" | "deposits" | "interventions" | "collectors" | "hubs" | "valorisation" | "analysis" | "intelligence" | "routes" | "reports-mairie" | "users" | "settings" | "imports";
@@ -342,9 +342,9 @@ function GeoJSONImport({ state, onImported }: { state: DemoState; onImported: (l
   const [inspection, setInspection] = useState<GeoInspection | null>(null);
   const [fileName, setFileName] = useState("");
   const [parseError, setParseError] = useState("");
-  const handleFile = (event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; if (!file) return; setFileName(file.name); setParseError(""); const reader = new FileReader(); reader.onload = () => { try { const parsed = JSON.parse(String(reader.result)); setInspection(inspectGeoJSON(parsed)); (window as any).__bohiconGeoJSON = parsed; } catch { setInspection(null); setParseError("JSON illisible : le fichier original n’a pas été modifié."); } }; reader.readAsText(file); };
-  const save = () => { if (!inspection || !inspection.valid) return; const parsed = (window as any).__bohiconGeoJSON; const { warnings } = inspectionSummary(inspection); const layer: ImportedLayer = { id: `GEO-${Date.now()}`, name: fileName.toLowerCase().includes("arr") ? "Limites des arrondissements" : fileName.toLowerCase().includes("depot") ? "Dépôts sauvages · terrain" : "Couche terrain importée", fileName, geometryTypes: inspection.geometryTypes, featureCount: inspection.featureCount, validCount: inspection.validCount, warningCount: warnings, properties: inspection.propertyKeys, provenance: "terrain", importedAt: new Date().toLocaleString("fr-FR"), geojson: parsed }; onImported(layer); setInspection(null); setFileName(""); toast.success("Couche importée", { description: `${layer.validCount} entités conservées avec leur provenance terrain.` }); };
-  return <div className="panel import-panel"><div className="import-drop"><div className="upload-icon"><FileJson size={23} /></div><h3>Importer un GeoJSON</h3><p>Limites d’arrondissements ou dépôts sauvages recensés sur le terrain.</p><label className="button button-primary"><Upload size={16} /> Choisir un fichier<input type="file" accept=".geojson,.json,application/geo+json,application/json" onChange={handleFile} hidden /></label><small>Le fichier original est lu localement et jamais modifié.</small></div>{parseError && <div className="inline-error"><CircleAlert size={15} />{parseError}</div>}{inspection && <div className="inspection-result"><div className="inspection-head"><div><div className="eyebrow">Aperçu · {fileName}</div><h3>{inspection.valid ? "Structure exploitable" : "Anomalies à corriger"}</h3></div>{inspection.valid ? <Tag tone="green">Valide</Tag> : <Tag tone="red">Non importable</Tag>}</div><div className="inspection-stats"><div><strong>{inspection.validCount}</strong><span>entités valides</span></div><div><strong>{inspection.featureCount}</strong><span>entités lues</span></div><div><strong>{inspection.geometryTypes.join(", ") || "—"}</strong><span>géométries</span></div><div><strong>{inspection.propertyKeys.length}</strong><span>champs source</span></div></div>{inspection.propertyKeys.length > 0 && <div className="property-list"><span>Attributs conservés</span>{inspection.propertyKeys.slice(0, 8).map(key => <Tag key={key}>{key}</Tag>)}</div>}<div className="issue-list">{inspection.issues.slice(0, 5).map((issue, index) => <div className={`issue-${issue.kind}`} key={index}>{issue.kind === "error" ? <CircleAlert size={14} /> : <CircleDot size={14} />}{issue.message}</div>)}</div><div className="form-actions"><button className="button button-outline" onClick={() => setInspection(null)}>Annuler</button><button className="button button-primary" disabled={!inspection.valid} onClick={save}><CloudUpload size={15} /> Conserver la couche</button></div></div>}{state.importedLayers.length > 0 && <div className="imported-list"><div className="eyebrow">Couches importées dans cette démo</div>{state.importedLayers.map(layer => <div className="imported-row" key={layer.id}><div className="imported-icon"><FileJson size={16} /></div><div><strong>{layer.name}</strong><span>{layer.fileName} · {layer.validCount} entités · {layer.importedAt}</span></div><Tag tone="blue">Terrain</Tag></div>)}</div>}</div>;
+  const handleFile = (event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; if (!file) return; setFileName(file.name); setParseError(""); const reader = new FileReader(); reader.onload = () => { try { const parsed = JSON.parse(String(reader.result)); const displayGeoJSON = normalizeGeoJSONForDisplay(parsed); setInspection(inspectGeoJSON(displayGeoJSON)); (window as any).__bohiconGeoJSON = displayGeoJSON; } catch { setInspection(null); setParseError("JSON illisible : le fichier original n’a pas été modifié."); } }; reader.readAsText(file); };
+  const save = () => { if (!inspection || !inspection.valid) return; const parsed = (window as any).__bohiconGeoJSON; const { warnings } = inspectionSummary(inspection); const layer: ImportedLayer = { id: `GEO-${Date.now()}`, name: fileName.toLowerCase().includes("arr") ? "Limites des arrondissements" : fileName.toLowerCase().includes("depot") ? "Dépôts sauvages · terrain" : "Couche terrain importée", fileName, geometryTypes: inspection.geometryTypes, featureCount: inspection.featureCount, validCount: inspection.validCount, warningCount: warnings, properties: inspection.propertyKeys, provenance: "terrain", importedAt: new Date().toLocaleString("fr-FR"), sourceCrs: parsed?.sourceCrs, displayCrs: parsed?.displayCrs, geojson: parsed }; onImported(layer); setInspection(null); setFileName(""); toast.success("Couche importée", { description: `${layer.validCount} entités conservées avec leur provenance terrain.` }); };
+  return <div className="panel import-panel"><div className="import-drop"><div className="upload-icon"><FileJson size={23} /></div><h3>Importer un GeoJSON</h3><p>Limites d’arrondissements ou dépôts sauvages recensés sur le terrain.</p><label className="button button-primary"><Upload size={16} /> Choisir un fichier<input type="file" accept=".geojson,.json,application/geo+json,application/json" onChange={handleFile} hidden /></label><small>Le fichier original est lu localement et jamais modifié.</small></div>{parseError && <div className="inline-error"><CircleAlert size={15} />{parseError}</div>}{inspection && <div className="inspection-result"><div className="inspection-head"><div><div className="eyebrow">Aperçu · {fileName}</div><h3>{inspection.valid ? "Structure exploitable" : "Anomalies à corriger"}</h3></div>{inspection.valid ? <Tag tone="green">Valide</Tag> : <Tag tone="red">Non importable</Tag>}</div><div className="inspection-stats"><div><strong>{inspection.validCount}</strong><span>entités valides</span></div><div><strong>{inspection.featureCount}</strong><span>entités lues</span></div><div><strong>{inspection.geometryTypes.join(", ") || "—"}</strong><span>géométries</span></div><div><strong>{inspection.propertyKeys.length}</strong><span>champs source</span></div></div>{inspection.propertyKeys.length > 0 && <div className="property-list"><span>Attributs conservés</span>{inspection.propertyKeys.slice(0, 8).map(key => <Tag key={key}>{key}</Tag>)}</div>}<div className="issue-list">{inspection.issues.slice(0, 5).map((issue, index) => <div className={`issue-${issue.kind}`} key={index}>{issue.kind === "error" ? <CircleAlert size={14} /> : <CircleDot size={14} />}{issue.message}</div>)}</div><div className="form-actions"><button className="button button-outline" onClick={() => setInspection(null)}>Annuler</button><button className="button button-primary" disabled={!inspection.valid} onClick={save}><CloudUpload size={15} /> Conserver la couche</button></div></div>}{state.importedLayers.length > 0 && <div className="imported-list"><div className="eyebrow">Couches importées dans cette démo</div>{state.importedLayers.map(layer => <div className="imported-row" key={layer.id}><div className="imported-icon"><FileJson size={16} /></div><div><strong>{layer.name}</strong><span>{layer.fileName} · {layer.validCount} entités · {layer.importedAt}{layer.sourceCrs ? ` · ${layer.sourceCrs} → ${layer.displayCrs}` : ""}</span></div><Tag tone="blue">Terrain</Tag></div>)}</div>}</div>;
 }
 
 function Admin({ state, onImported, onReset }: { state: DemoState; onImported: (layer: ImportedLayer) => void; onReset: () => void }) {
@@ -387,6 +387,38 @@ export default function Home() {
             reports: [...current.reports, ...terrainReports.filter(report => !existingIds.has(report.id))],
             importedLayers: [...current.importedLayers, layer],
           };
+        });
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/Arrondissements_Bohicon_wgs84.geojson")
+      .then(response => response.json())
+      .then(input => {
+        if (cancelled) return;
+        const inspection = inspectGeoJSON(input);
+        if (!inspection.valid) return;
+        setState(current => {
+          if (current.importedLayers.some(layer => layer.fileName === "Arrondissements_Bohicon.geojson")) return current;
+          const { warnings } = inspectionSummary(inspection);
+          const layer: ImportedLayer = {
+            id: "GEO-ARRONDISSEMENTS-2026",
+            name: "Limites administratives · arrondissements de Bohicon",
+            fileName: "Arrondissements_Bohicon.geojson",
+            geometryTypes: inspection.geometryTypes,
+            featureCount: inspection.featureCount,
+            validCount: inspection.validCount,
+            warningCount: warnings,
+            properties: inspection.propertyKeys,
+            provenance: "terrain",
+            importedAt: "10 oct. 2026 · fichier fourni, reprojeté pour affichage",
+            sourceCrs: String(input.sourceCrs ?? "EPSG:32631"),
+            displayCrs: String(input.displayCrs ?? "EPSG:4326"),
+            geojson: input,
+          };
+          return { ...current, importedLayers: [...current.importedLayers, layer] };
         });
       })
       .catch(() => undefined);

@@ -1,0 +1,327 @@
+{
+  "sourceFile": "Arrondissements_Bohicon.geojson",
+  "sourceCrs": "EPSG:32631",
+  "displayCrs": "EPSG:4326",
+  "boundaryCount": 10,
+  "depositCount": 188,
+  "unmatchedCount": 0,
+  "nameMismatches": [
+    {
+      "code": "D021",
+      "source": "BOHICON II",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D039",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D041",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D049",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D056",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D057",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D058",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D059",
+      "source": "LISSEZOUN",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D066",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D067",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D068",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D069",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D070",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D071",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D072",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D073",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D074",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D075",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D076",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D088",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D090",
+      "source": "BOHICON I",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D091",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D092",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D093",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D094",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D095",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D096",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D102",
+      "source": "SODOHOME",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D108",
+      "source": "SODOHOME",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D113",
+      "source": "AGONGONTO",
+      "spatial": "Avogbanna"
+    },
+    {
+      "code": "D117",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D118",
+      "source": "BOHICON II",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D119",
+      "source": "BOHICON II",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D120",
+      "source": "BOHICON II",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D121",
+      "source": "BOHICON II",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D123",
+      "source": "AGONGONTO",
+      "spatial": "Gnidjazoun"
+    },
+    {
+      "code": "D125",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D126",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D127",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D133",
+      "source": "AGONGONTO",
+      "spatial": "Avogbanna"
+    },
+    {
+      "code": "D134",
+      "source": "AGONGONTO",
+      "spatial": "Avogbanna"
+    },
+    {
+      "code": "D135",
+      "source": "AGONGONTO",
+      "spatial": "Avogbanna"
+    },
+    {
+      "code": "D137",
+      "source": "AGONGONTO",
+      "spatial": "Avogbanna"
+    },
+    {
+      "code": "D138",
+      "source": "SACLO",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D139",
+      "source": "SACLO",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D140",
+      "source": "BOHICON I",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D141",
+      "source": "SODOHOME",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D142",
+      "source": "SODOHOME",
+      "spatial": "Agongointo"
+    },
+    {
+      "code": "D165",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D166",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D167",
+      "source": "GNIDJAZOUN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D168",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D169",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D170",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D171",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D172",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D173",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D174",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D176",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D177",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D178",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D179",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    },
+    {
+      "code": "D181",
+      "source": "AVOGBANNAN",
+      "spatial": "LissCzoun"
+    }
+  ],
+  "spatialMatchedCount": 188,
+  "sourceNameMismatchCount": 63
+}

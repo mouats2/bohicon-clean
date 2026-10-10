@@ -17,7 +17,7 @@ export type Hub = { id: string; name: string; arrondissement: string; location: 
 export type Collector = { id: string; name: string; zone: string; status: "Actif" | "En formation" | "Suspendu"; quality: number; collectedKg: number; earnings: number; availability: string };
 export type LedgerEntry = { id: string; date: string; label: string; amount: number; kind: "credit" | "debit" };
 export type Collection = { id: string; date: string; category: string; declaredKg: number; verifiedKg: number | null; validatedKg: number | null; hub: string; status: "Déclarée" | "Vérifiée" | "Validée"; paid: boolean };
-export type ImportedLayer = { id: string; name: string; fileName: string; geometryTypes: string[]; featureCount: number; validCount: number; warningCount: number; properties: string[]; provenance: "terrain"; importedAt: string; geojson: unknown };
+export type ImportedLayer = { id: string; name: string; fileName: string; geometryTypes: string[]; featureCount: number; validCount: number; warningCount: number; properties: string[]; provenance: "terrain"; importedAt: string; geojson: unknown; sourceCrs?: string; displayCrs?: string };
 export type DemoState = { reports: Report[]; interventions: Intervention[]; hubs: Hub[]; collectors: Collector[]; collections: Collection[]; points: number; ledger: LedgerEntry[]; importedLayers: ImportedLayer[]; lastUpdated: string };
 
 export const ARRONDISSEMENTS = ["Bohicon I", "Bohicon II", "Bohicon III", "Bohicon IV"];

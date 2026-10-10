@@ -48,4 +48,10 @@ Le modèle prépare une migration ultérieure vers API + PostgreSQL/PostGIS : le
 
 Le fichier `client/public/data/depots_sauvages_corrige.geojson` est une copie binaire du fichier fourni par l’utilisateur. L’audit du 10 octobre 2026 indique une `FeatureCollection` de **188 entités**, toutes de géométrie `Point`, avec des coordonnées longitude/latitude plausibles et une troisième valeur d’altitude. Les codes observés restent des attributs source, sans réécriture ; les 188 codes sont uniques. Les champs de caractérisation comprennent notamment le quartier, l’arrondissement, le type de dépôt, le volume estimé, la nature des déchets, les proximités, l’accessibilité, l’état et les nuisances.
 
-À l’exécution, la couche est chargée automatiquement comme provenance `terrain`. Les fiches normalisées affichées dans les listes sont des **résultats calculés** : elles reprennent le code, le quartier, l’arrondissement, les coordonnées et les attributs descriptifs, sans remplacer la couche originale. Les limites d’arrondissement n’étant pas encore fournies, aucun rattachement spatial supplémentaire n’est calculé à ce stade.
+À l’exécution, la couche est chargée automatiquement comme provenance `terrain`. Les fiches normalisées affichées dans les listes sont des **résultats calculés** : elles reprennent le code, le quartier, l’arrondissement, les coordonnées et les attributs descriptifs, sans remplacer la couche originale. Le rattachement aux limites est documenté dans la section administrative ci-dessous et ne réécrit pas l’attribut textuel source.
+
+## Couche administrative reçue — arrondissements
+
+Le fichier `client/public/data/Arrondissements_Bohicon.geojson` est conservé à l’identique. Il contient **10 MultiPolygon** en **EPSG:32631 / UTM zone 31N**. Pour la projection de la carte, `Arrondissements_Bohicon_wgs84.geojson` est généré en **EPSG:4326**, avec la mention `sourceCrs`/`displayCrs` et sans remplacer la source. Les 10 limites sont visibles comme couche administrative indépendante.
+
+Le contrôle spatial place les **188 dépôts dans une limite**. Il relève **63 écarts** entre l’arrondissement textuel déclaré dans la fiche de dépôt et l’arrondissement déterminé par le polygone. Ces écarts sont conservés comme qualité de donnée à examiner : l’application ne réécrit pas silencieusement l’attribut source.
