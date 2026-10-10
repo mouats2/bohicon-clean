@@ -1,0 +1,18 @@
+# BOHICON CLEAN — critères de réalisation
+
+- [ ] La page publique présente BOHICON CLEAN, le slogan « Ensemble, pour une ville plus propre et mieux organisée. », les accès Signaler un dépôt / Devenir collecteur / Espace mairie, une carte d’aperçu, des indicateurs marqués démonstratifs, le cycle de gestion, les catégories, les avantages, les trois parcours, l’à-propos et le footer.
+- [ ] Les cinq espaces Public, Citoyen, Collecteur, Mairie et Administration partagent une identité et un sélecteur de comptes de démonstration, sans exposer les fonctions hors profil actif.
+- [ ] Le citoyen peut créer un signalement progressif avec catégorie plastique/organique/papier-carton/métal/verre/mixte/autre, gravité, localisation manuelle, description et états explicites pour photo/GPS/vocal simulés ; l’envoi crée un identifiant et le statut « En attente ».
+- [ ] Les signalements affichent identifiant, date, localisation, statut et historique ; les transitions mairie couvrent vérification, validation, rejet, doublon et traité ; la validation crédite les points une seule fois.
+- [ ] Le portefeuille citoyen affiche solde, historique, progression et récompenses simulées avec confirmation avant utilisation.
+- [ ] Le collecteur dispose d’un parcours zone/disponibilité/sécurité, d’une formation sur EPI, risques, tri, transport et déchets dangereux, puis d’un quiz de dix questions avec seuil de réussite à 80 % et possibilité de recommencer.
+- [ ] Le collecteur peut saisir une collecte avec catégories, quantités estimées et point de regroupement ; la réception distingue déclaré, vérifié et validé ; une grille FCFA/kg fictive produit des gains sans double-validation ni double-paiement.
+- [ ] La mairie possède une vue générale avec dépôts recensés, à traiter, traités, récurrents, collecteurs actifs, quantités, interventions et secteurs prioritaires, ainsi que graphiques et listes liées aux données disponibles.
+- [ ] Les dépôts sont filtrables et présentent localisation, arrondissement, catégories, date, historique, priorité et interventions ; la détection de récurrence/doublon est explicitement proposée sans fusion automatique.
+- [ ] Les interventions possèdent identifiant, site, priorité, responsable, date prévue, commentaires, statuts à planifier/planifiée/en cours/terminée/à contrôler et historique.
+- [ ] La carte centrale gère des couches indépendantes et distingue visuellement terrain et démonstration ; elle synchronise les entités visibles et permet la sélection.
+- [ ] Le module GeoJSON charge un fichier local, vérifie structure/géométries/types/coordonnées/propriétés, compte les entités valides, signale anomalies et champs manquants, conserve les attributs source et affiche un aperçu sans transformation silencieuse.
+- [ ] L’analyse multicritère active/désactive des critères, normalise et pondère à somme 1, affiche score/classes/données manquantes/hypothèses et rappelle le caractère dépendant des données.
+- [ ] L’espace Intelligence et recommandations couvre doublons potentiels, zones à surveiller, priorisation justifiée, recommandations opérationnelles et résumé de situation ; aucune IA externe non configurée n’est présentée comme active.
+- [ ] Le prototype local initialise ses données, persiste les mutations, affiche des notifications, conserve des historiques, permet un reset et indique les fonctions nécessitant backend/GPS/photo/IA/connexion externe.
+- [ ] L’application est responsive Android/tablette/ordinateur, avec mobile prioritaire pour citoyen/collecteur et espace mairie adapté aux écrans larges.
