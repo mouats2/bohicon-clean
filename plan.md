@@ -43,3 +43,9 @@ Le modèle prépare une migration ultérieure vers API + PostgreSQL/PostGIS : le
 - GPS, photo, vidéo, vocal, IA réelle, cartographie routière et synchronisation serveur sont affichés comme simulés ou non configurés lorsqu’ils ne sont pas réellement disponibles.
 - La carte est une projection SVG de démonstration : elle accepte les entités GeoJSON importées et les données locales, mais ne prétend pas être un fond cartographique officiel.
 - Les statistiques de démonstration sont étiquetées ; les résultats issus des fichiers importés conserveront leur provenance.
+
+## Donnée terrain reçue — dépôts sauvages
+
+Le fichier `client/public/data/depots_sauvages_corrige.geojson` est une copie binaire du fichier fourni par l’utilisateur. L’audit du 10 octobre 2026 indique une `FeatureCollection` de **188 entités**, toutes de géométrie `Point`, avec des coordonnées longitude/latitude plausibles et une troisième valeur d’altitude. Les codes observés restent des attributs source, sans réécriture ; les 188 codes sont uniques. Les champs de caractérisation comprennent notamment le quartier, l’arrondissement, le type de dépôt, le volume estimé, la nature des déchets, les proximités, l’accessibilité, l’état et les nuisances.
+
+À l’exécution, la couche est chargée automatiquement comme provenance `terrain`. Les fiches normalisées affichées dans les listes sont des **résultats calculés** : elles reprennent le code, le quartier, l’arrondissement, les coordonnées et les attributs descriptifs, sans remplacer la couche originale. Les limites d’arrondissement n’étant pas encore fournies, aucun rattachement spatial supplémentaire n’est calculé à ce stade.

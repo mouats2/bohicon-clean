@@ -67,6 +67,7 @@ import {
   formatFcfa,
   loadState,
   persistState,
+  terrainReportsFromGeoJSON,
 } from "@/lib/demo";
 import { flattenCoordinates, inspectionSummary, inspectGeoJSON, type GeoInspection } from "@/lib/geojson";
 
@@ -188,15 +189,16 @@ function OperationalMap({ reports, hubs, interventions, importedLayers, compact 
       <text x="145" y="118" className="map-label">Bohicon I</text><text x="505" y="112" className="map-label">Bohicon II</text><text x="275" y="278" className="map-label">Bohicon III</text><text x="560" y="280" className="map-label">Bohicon IV</text>
       {importedLayers.flatMap(layer => {
         const raw = layer.geojson as any;
+        const pointLayerIsNormalized = layer.fileName.toLowerCase().includes("depot");
         return (raw?.features ?? []).map((feature: any, index: number) => {
           const coords = flattenCoordinates(feature.geometry);
           const points = coords.map(([lng, lat]) => project(lng, lat).join(",")).join(" ");
-          if (feature.geometry?.type === "Point") { const [x, y] = project(coords[0]?.[0] ?? minLng, coords[0]?.[1] ?? minLat); return <circle key={`${layer.id}-${index}`} cx={x} cy={y} r="7" className="map-imported-point" />; }
+          if (feature.geometry?.type === "Point") { if (pointLayerIsNormalized) return null; const [x, y] = project(coords[0]?.[0] ?? minLng, coords[0]?.[1] ?? minLat); return <circle key={`${layer.id}-${index}`} cx={x} cy={y} r="7" className="map-imported-point" />; }
           return <polyline key={`${layer.id}-${index}`} points={points} className="map-imported-line" />;
         });
       })}
       {hubs.map(hub => { const [x, y] = project(hub.lng, hub.lat); return <g key={hub.id}><rect x={x - 7} y={y - 7} width="14" height="14" rx="4" className={`map-hub ${hub.operational ? "" : "map-hub-off"}`} /><text x={x + 11} y={y + 4} className="map-marker-label">{hub.name}</text></g>; })}
-      {safeReports.map(report => { const [x, y] = project(report.lng, report.lat); return <g key={report.id} className="map-marker" onClick={() => onSelect?.(report)}><circle cx={x} cy={y} r="12" className={`map-report-halo halo-${statusTone[report.status] ?? "neutral"}`} /><circle cx={x} cy={y} r="6" className={`map-report-dot dot-${statusTone[report.status] ?? "neutral"}`} /><text x={x + 14} y={y - 7} className="map-marker-label">{report.id.replace("BC-2026-", "#")}</text></g>; })}
+      {safeReports.map(report => { const [x, y] = project(report.lng, report.lat); const markerTone = report.provenance === "terrain" ? "blue" : (statusTone[report.status] ?? "neutral"); return <g key={report.id} className="map-marker" onClick={() => onSelect?.(report)}><circle cx={x} cy={y} r="12" className={`map-report-halo halo-${markerTone}`} /><circle cx={x} cy={y} r="6" className={`map-report-dot dot-${markerTone}`} /><text x={x + 14} y={y - 7} className="map-marker-label">{report.id.replace("BC-2026-", "#")}</text></g>; })}
       {interventions.slice(0, compact ? 2 : 8).map(intervention => { const report = reports.find(r => r.id === intervention.siteId); if (!report) return null; const [x, y] = project(report.lng + 0.001, report.lat - 0.001); return <path key={intervention.id} d={`M${x - 8} ${y + 10} l8 8 l8 -8`} className="map-intervention" />; })}
     </svg><div className="map-legend"><span><i className="legend-dot legend-red" />Dépôt prioritaire</span><span><i className="legend-dot legend-blue" />Signalement</span><span><i className="legend-square" />Point de regroupement</span><span><i className="legend-imported" />Import terrain</span></div></div>
   </div>;
@@ -302,8 +304,9 @@ function Deposits({ state, onStatus }: { state: DemoState; onStatus: (id: string
   const [query, setQuery] = useState("");
   const [arrondissement, setArrondissement] = useState("Tous");
   const [selected, setSelected] = useState<Report | null>(null);
+  const availableArrondissements = Array.from(new Set([...ARRONDISSEMENTS, ...state.reports.map(report => report.arrondissement)])).sort();
   const list = state.reports.filter(report => `${report.location} ${report.id} ${report.category}`.toLowerCase().includes(query.toLowerCase())).filter(report => arrondissement === "Tous" || report.arrondissement === arrondissement);
-  return <div className="workspace mairie-workspace"><SectionHeading eyebrow="Données terrain & démonstration" title="Dépôts sauvages" description="Les doublons potentiels sont signalés, jamais fusionnés automatiquement." action={<Tag tone="green">{state.reports.length} entités</Tag>} /><div className="filter-bar"><Search size={16} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher un site, un identifiant, une catégorie" /><select value={arrondissement} onChange={e => setArrondissement(e.target.value)}><option>Tous</option>{ARRONDISSEMENTS.map(item => <option key={item}>{item}</option>)}</select><button className="button button-outline"><SlidersHorizontal size={15} /> Filtres</button></div><div className="deposits-layout"><div className="panel table-panel"><div className="table-scroll"><table><thead><tr><th>Site</th><th>Provenance</th><th>Catégorie</th><th>Priorité</th><th>Statut</th><th>Action</th></tr></thead><tbody>{list.map(report => <tr key={report.id} className={selected?.id === report.id ? "row-selected" : ""}><td><button className="table-link" onClick={() => setSelected(report)}><strong>{report.location}</strong><span>{report.id} · {report.date}</span></button></td><td><Tag tone={report.provenance === "terrain" ? "blue" : "neutral"}>{report.provenance === "terrain" ? "Terrain importé" : "Démo"}</Tag></td><td>{report.category}</td><td><span className={`priority priority-${report.priority.toLowerCase()}`}><i />{report.priority}</span></td><td>{statusLabel(report.status)}</td><td><select className="status-select" value={report.status} onChange={e => onStatus(report.id, e.target.value as ReportStatus)}><option>En attente</option><option>En cours de vérification</option><option>Validé</option><option>Rejeté</option><option>Doublon</option><option>Traité</option></select></td></tr>)}</tbody></table></div></div>{selected ? <div className="panel detail-panel"><div className="panel-header"><div><Tag tone={selected.provenance === "terrain" ? "blue" : "neutral"}>{selected.provenance === "terrain" ? "Donnée terrain" : "Donnée de démonstration"}</Tag><h3>{selected.id}</h3></div><button className="icon-button" onClick={() => setSelected(null)}><X size={16} /></button></div><div className="detail-location"><MapPinned size={16} /><span>{selected.location}<small>{selected.arrondissement} · coordonnées contrôlées de démo</small></span></div><div className="detail-grid"><div><span>Catégorie</span><strong>{selected.category}</strong></div><div><span>Gravité</span><strong>{selected.severity}</strong></div><div><span>Priorité</span><strong>{selected.priority}</strong></div><div><span>Statut</span><strong>{selected.status}</strong></div></div><p className="detail-description">{selected.description}</p><div className="detail-actions"><button className="button button-primary" onClick={() => onStatus(selected.id, "Validé")}><CheckCircle2 size={15} /> Valider</button><button className="button button-outline" onClick={() => toast.success("Intervention créée", { description: `Une intervention est liée à ${selected.id}.` })}><Plus size={15} /> Intervention</button></div><div className="detail-history"><div className="eyebrow">Historique</div><MiniTimeline history={selected.history} /></div></div> : <div className="panel select-hint"><MapPinned size={27} /><h3>Sélectionnez un site</h3><p>La fiche détaillée affichera l’historique, les coordonnées et les actions disponibles.</p></div>}</div></div>;
+  return <div className="workspace mairie-workspace"><SectionHeading eyebrow="Données terrain & démonstration" title="Dépôts sauvages" description="Les doublons potentiels sont signalés, jamais fusionnés automatiquement." action={<Tag tone="green">{state.reports.length} entités</Tag>} /><div className="filter-bar"><Search size={16} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher un lieu, un code ou une catégorie" /><select value={arrondissement} onChange={e => setArrondissement(e.target.value)}><option>Tous</option>{availableArrondissements.map(item => <option key={item}>{item}</option>)}</select><button className="button button-outline"><SlidersHorizontal size={15} /> Filtres</button></div><div className="deposits-layout"><div className="panel table-panel"><div className="table-scroll"><table><thead><tr><th>Site</th><th>Provenance</th><th>Catégorie</th><th>Priorité</th><th>Statut</th><th>Action</th></tr></thead><tbody>{list.map(report => <tr key={report.id} className={selected?.id === report.id ? "row-selected" : ""}><td><button className="table-link" onClick={() => setSelected(report)}><strong>{report.location}</strong><span>{report.id} · {report.date}</span></button></td><td><Tag tone={report.provenance === "terrain" ? "blue" : "neutral"}>{report.provenance === "terrain" ? "Terrain importé" : "Démo"}</Tag></td><td>{report.category}</td><td><span className={`priority priority-${report.priority.toLowerCase()}`}><i />{report.priority}</span></td><td>{statusLabel(report.status)}</td><td><select className="status-select" value={report.status} onChange={e => onStatus(report.id, e.target.value as ReportStatus)}><option>En attente</option><option>En cours de vérification</option><option>Validé</option><option>Rejeté</option><option>Doublon</option><option>Traité</option></select></td></tr>)}</tbody></table></div></div>{selected ? <div className="panel detail-panel"><div className="panel-header"><div><Tag tone={selected.provenance === "terrain" ? "blue" : "neutral"}>{selected.provenance === "terrain" ? "Donnée terrain" : "Donnée de démonstration"}</Tag><h3>{selected.id}</h3></div><button className="icon-button" onClick={() => setSelected(null)}><X size={16} /></button></div><div className="detail-location"><MapPinned size={16} /><span>{selected.location}<small>{selected.arrondissement} · coordonnées du fichier source conservées</small></span></div><div className="detail-grid"><div><span>Catégorie</span><strong>{selected.category}</strong></div><div><span>Gravité</span><strong>{selected.severity}</strong></div><div><span>Priorité</span><strong>{selected.priority}</strong></div><div><span>Statut</span><strong>{selected.status}</strong></div></div><p className="detail-description">{selected.description}</p><div className="detail-actions"><button className="button button-primary" onClick={() => onStatus(selected.id, "Validé")}><CheckCircle2 size={15} /> Valider</button><button className="button button-outline" onClick={() => toast.success("Intervention créée", { description: `Une intervention est liée à ${selected.id}.` })}><Plus size={15} /> Intervention</button></div><div className="detail-history"><div className="eyebrow">Historique</div><MiniTimeline history={selected.history} /></div></div> : <div className="panel select-hint"><MapPinned size={27} /><h3>Sélectionnez un site</h3><p>La fiche détaillée affichera l’historique, les coordonnées et les actions disponibles.</p></div>}</div></div>;
 }
 
 function Interventions({ interventions }: { interventions: Intervention[] }) {
@@ -353,12 +356,52 @@ export default function Home() {
   const [view, setView] = useState<ViewKey>("overview");
   const [state, setState] = useState<DemoState>(() => loadState());
   useEffect(() => { persistState(state); }, [state]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/depots_sauvages_corrige.geojson")
+      .then(response => response.json())
+      .then(input => {
+        if (cancelled) return;
+        const inspection = inspectGeoJSON(input);
+        if (!inspection.valid) return;
+        setState(current => {
+          if (current.importedLayers.some(layer => layer.fileName === "depots_sauvages_corrige.geojson")) return current;
+          const terrainReports = terrainReportsFromGeoJSON(input);
+          const existingIds = new Set(current.reports.map(report => report.id));
+          const { warnings } = inspectionSummary(inspection);
+          const layer: ImportedLayer = {
+            id: "GEO-DEPOTS-2026",
+            name: "Dépôts sauvages · terrain utilisateur",
+            fileName: "depots_sauvages_corrige.geojson",
+            geometryTypes: inspection.geometryTypes,
+            featureCount: inspection.featureCount,
+            validCount: inspection.validCount,
+            warningCount: warnings,
+            properties: inspection.propertyKeys,
+            provenance: "terrain",
+            importedAt: "10 oct. 2026 · fichier fourni par l’utilisateur",
+            geojson: input,
+          };
+          return {
+            ...current,
+            reports: [...current.reports, ...terrainReports.filter(report => !existingIds.has(report.id))],
+            importedLayers: [...current.importedLayers, layer],
+          };
+        });
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
   const switchRole = (nextRole: Role, nextView: ViewKey = "overview") => { setRole(nextRole); setView(nextView); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const reset = () => { const fresh = createInitialState(); setState(fresh); toast.success("Démonstration réinitialisée", { description: "Les données locales ont retrouvé leur état initial." }); };
   const submitReport = (report: Report) => { setState(current => ({ ...current, reports: [report, ...current.reports] })); toast.success("Signalement enregistré", { description: `${report.id} · statut En attente. Aucun point n’est crédité avant validation.` }); setView("reports"); };
   const updateReport = (id: string, status: ReportStatus) => { setState(current => { const reports = current.reports.map(report => { if (report.id !== id) return report; const duplicate = report.status === status; const nextHistory = duplicate ? report.history : [...report.history, { label: `Statut mis à jour · ${status}`, date: "14 oct. · maintenant", note: status === "Validé" ? "Décision municipale enregistrée" : undefined }]; return { ...report, status, history: nextHistory, rewardCredited: report.rewardCredited || status !== "Validé" ? report.rewardCredited : true }; }); const target = current.reports.find(report => report.id === id); const shouldCredit = target && status === "Validé" && !target.rewardCredited; return { ...current, reports, points: shouldCredit ? current.points + 25 : current.points, ledger: shouldCredit ? [{ id: `LED-${Date.now()}`, date: "14 oct. 2026", label: `Signalement ${id} validé`, amount: 25, kind: "credit" }, ...current.ledger] : current.ledger }; }); toast.success(`Statut mis à jour · ${status}`, { description: status === "Validé" ? "Le crédit de points unique est appliqué si nécessaire." : "L’historique du signalement est conservé." }); };
   const saveCollection = (collection: Collection) => { setState(current => ({ ...current, collections: [collection, ...current.collections] })); toast.success("Collecte déclarée", { description: "La pesée vérifiée reste nécessaire avant validation et paiement." }); setView("history"); };
-  const saveLayer = (layer: ImportedLayer) => setState(current => ({ ...current, importedLayers: [...current.importedLayers, layer] }));
+  const saveLayer = (layer: ImportedLayer) => setState(current => {
+    const terrainReports = layer.fileName.toLowerCase().includes("depot") ? terrainReportsFromGeoJSON(layer.geojson) : [];
+    const existingIds = new Set(current.reports.map(report => report.id));
+    return { ...current, reports: [...current.reports, ...terrainReports.filter(report => !existingIds.has(report.id))], importedLayers: [...current.importedLayers, layer] };
+  });
   if (role === "public") return <PublicHome onRole={switchRole} />;
   const renderView = () => {
     if (role === "citizen") { if (view === "report") return <ReportForm onSubmit={submitReport} onCancel={() => setView("overview")} />; if (view === "reports") return <CitizenReports reports={state.reports} onView={setView} />; if (view === "points") return <PointsWallet state={state} onView={setView} />; if (view === "rewards") return <Rewards />; if (view === "map") return <div className="workspace"><SectionHeading eyebrow="Proximité" title="Carte citoyenne" description="Dépôts, points et signalements proches dans la vue de démonstration." /><OperationalMap reports={state.reports} hubs={state.hubs} interventions={state.interventions} importedLayers={state.importedLayers} /></div>; return <CitizenOverview state={state} onView={setView} onReport={() => setView("report")} />; }
