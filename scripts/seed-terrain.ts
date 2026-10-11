@@ -1,0 +1,33 @@
+import "dotenv/config";
+import { readFile } from "node:fs/promises";
+import { drizzle } from "drizzle-orm/mysql2";
+import { depotsSauvages } from "../drizzle/schema";
+
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) throw new Error("DATABASE_URL est requis");
+const inputPath = new URL("../client/public/data/depots_sauvages_corrige.geojson", import.meta.url);
+const input = JSON.parse(await readFile(inputPath, "utf8"));
+const features = Array.isArray(input.features) ? input.features : [];
+const text = (properties: Record<string, unknown>, key: string, fallback = "") => properties[key] == null || String(properties[key]).trim() === "" ? fallback : String(properties[key]);
+const rows = features.flatMap((feature: any, index: number) => {
+  if (feature?.geometry?.type !== "Point" || !Array.isArray(feature.geometry.coordinates)) return [];
+  const [lng, lat] = feature.geometry.coordinates.map(Number);
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) return [];
+  const properties = feature.properties ?? {};
+  const sourceCode = text(properties, "Code du dépôt", `TERRAIN-${index + 1}`);
+  const volume = text(properties, "Volume estimé").toLowerCase();
+  const type = text(properties, "Type de dépôt", "Dépôt terrain");
+  const priority = volume.includes("élev") || type.toLowerCase().includes("grand") ? "Haute" : volume.includes("moy") ? "Moyenne" : "Basse";
+  const severity = priority === "Haute" ? "Élevée" : priority === "Moyenne" ? "Moyenne" : "Faible";
+  const sourceDate = text(properties, "Date du relevé", text(properties, "Date et heure de saisie"));
+  const arrondissement = text(properties, "Arrondissement", "Non attribué");
+  const quartier = text(properties, "Quartier", "Localisation terrain");
+  return [{ id: sourceCode, sourceCode, sourceLayer: "depots_sauvages_corrige.geojson", sourceProperties: properties, sourceDate, category: type, severity: severity as "Faible" | "Moyenne" | "Élevée", priority: priority as "Basse" | "Moyenne" | "Haute", status: "Recensé" as const, description: text(properties, "Nature des déchets présents", "Nature non renseignée"), location: `${quartier} · ${arrondissement}`, lat: lat.toFixed(8), lng: lng.toFixed(8), arrondissementSource: arrondissement, arrondissementComputed: null }];
+  });
+const sourceCodes = rows.map((row: any) => row.sourceCode);
+if (rows.length !== 188) throw new Error(`Attendu: 188 dépôts terrain, reçu: ${rows.length}`);
+if (new Set(sourceCodes).size !== sourceCodes.length) throw new Error("Les codes source des dépôts terrain doivent être uniques");
+const db = drizzle(databaseUrl);
+if (rows.length) await db.insert(depotsSauvages).values(rows).onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
+console.log(`terrain-seed: ${rows.length} entités traitées (insert idempotent)`);
+process.exit(0);

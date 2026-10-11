@@ -323,5 +323,8 @@
     }
   ],
   "spatialMatchedCount": 188,
-  "sourceNameMismatchCount": 63
+  "sourceNameMismatchCount": 63,
+  "method": "Point-in-Polygon / Point-in-MultiPolygon sur la couche administrative affichée en EPSG:4326; les noms source et BN_NIV4 sont conservés séparément.",
+  "comparison": "Comparaison des valeurs textuelles après normalisation casse/accents; aucun remplacement automatique.",
+  "generatedAt": "2026-10-11T09:26:07.957670+00:00"
 }
