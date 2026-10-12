@@ -2830,7 +2830,7 @@ function MairieOverview({
               Voir tous <ChevronRight size={14} />
             </button>
           </div>
-          {importantDeposits.slice(0, 3).map(depot => (
+          {importantDeposits.slice(0, 6).map(depot => (
             <div className="priority-row" key={depot.id}>
               <div className="priority-score">
                 {depot.severity === "Élevée" ? "A" : "B"}
