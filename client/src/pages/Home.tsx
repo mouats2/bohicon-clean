@@ -3586,6 +3586,7 @@ function Analysis({ state }: { state: DemoState }) {
 
 function Intelligence({ state }: { state: DemoState }) {
   const [question, setQuestion] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
   const [agentStatus, setAgentStatus] = useState<
     "ready" | "loading" | "fallback"
   >("ready");
@@ -3615,6 +3616,7 @@ function Intelligence({ state }: { state: DemoState }) {
   const ask = async () => {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion || askMutation.isPending) return;
+    setLastQuestion(trimmedQuestion);
     setAgentStatus("loading");
     try {
       const result = await askMutation.mutateAsync({
@@ -3674,8 +3676,52 @@ function Intelligence({ state }: { state: DemoState }) {
             </div>
           </div>
           <div className="ai-answer">
-            <div className="eyebrow">Situation source</div>
-            <p>{answer}</p>
+            <div className="eyebrow">Conversation</div>
+            <div className="ai-thread">
+              {lastQuestion && (
+                <div className="ai-message ai-message-user">
+                  <span className="ai-message-label">
+                    Question de la mairie
+                  </span>
+                  <p>{lastQuestion}</p>
+                </div>
+              )}
+              <div className="ai-message ai-message-assistant">
+                <span className="ai-message-label">
+                  <Sparkles size={12} /> Réponse de l’agent IA
+                </span>
+                <div className="ai-response-content">
+                  {answer.split(/\r?\n/).map((line, index) => {
+                    const trimmed = line.trim();
+                    if (!trimmed)
+                      return <div className="ai-response-space" key={index} />;
+                    if (
+                      /^(Constat|Interprétation prudente|Actions proposées|Conclusion|Limites|Décision)/i.test(
+                        trimmed
+                      )
+                    ) {
+                      return <h4 key={index}>{trimmed.replace(/:$/, "")}</h4>;
+                    }
+                    const step = trimmed.match(/^(\d+)\.\s+(.*)$/);
+                    if (step)
+                      return (
+                        <div className="ai-response-step" key={index}>
+                          <b>{step[1]}</b>
+                          <span>{step[2]}</span>
+                        </div>
+                      );
+                    if (trimmed.startsWith("- ") || trimmed.startsWith("• "))
+                      return (
+                        <div className="ai-response-bullet" key={index}>
+                          <i />
+                          {trimmed.slice(2)}
+                        </div>
+                      );
+                    return <p key={index}>{trimmed}</p>;
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
           <div className="ai-input">
             <input
