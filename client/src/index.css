@@ -3827,7 +3827,7 @@ a {
   }
 }
 
-/* OpenStreetMap / Leaflet */
+/* Carte métier sans fond : limites administratives et dépôts terrain */
 .osm-map {
   width: 100%;
   height: 365px;

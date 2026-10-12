@@ -360,17 +360,6 @@ function OperationalMap({
       [7.318881730366753, 2.197265625],
     ]);
     map.setMaxBounds(osmBounds);
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      {
-        subdomains: "abcd",
-        minZoom: 12,
-        maxZoom: 19,
-        noWrap: true,
-        attribution:
-          '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>',
-      }
-    ).addTo(map);
     const bounds = L.latLngBounds([]);
     importedLayers
       .filter(layer => !layer.fileName.toLowerCase().includes("depot"))
@@ -441,11 +430,13 @@ function OperationalMap({
     <div className={`map-card ${compact ? "map-compact" : ""}`}>
       <div className="map-toolbar">
         <div className="map-title">
-          <Map size={16} /> OpenStreetMap{" "}
+          <Map size={16} /> Données terrain{" "}
           <Tag tone="green">Terrain + signalements</Tag>
         </div>
         <div className="map-tools">
-          <span className="map-source-label">CARTO Voyager</span>
+          <span className="map-source-label">
+            Fond masqué · données uniquement
+          </span>
         </div>
       </div>
       <div className="map-canvas">
@@ -453,7 +444,7 @@ function OperationalMap({
           ref={mapNode}
           className="osm-map"
           role="img"
-          aria-label="Carte OpenStreetMap de Bohicon"
+          aria-label="Carte des limites d’arrondissements et des dépôts terrain de Bohicon"
         />
         <div className="map-legend">
           <span>
@@ -560,7 +551,8 @@ function PublicHome({
           </div>
           <div className="hero-visual">
             <div className="hero-map-label">
-              <span className="pulse-dot" /> Bohicon · fond OpenStreetMap
+              <span className="pulse-dot" /> Bohicon · données terrain
+              uniquement
             </div>
             <OperationalMap
               reports={state.depots}
@@ -614,9 +606,10 @@ function PublicHome({
             <div className="eyebrow">Une lecture commune du territoire</div>
             <h2>Les données ne restent pas dans un tableau.</h2>
             <p>
-              Les dépôts et limites reçus sont visibles sur OpenStreetMap, avec
-              leur provenance. Les flux de collecte apparaîtront uniquement
-              après réception de données opérationnelles.
+              Les dépôts et limites reçus sont affichés sans fond
+              cartographique, avec leur provenance. Les flux de collecte
+              apparaîtront uniquement après réception de données
+              opérationnelles.
             </p>
             <button
               className="text-button"
@@ -4090,7 +4083,7 @@ export default function Home() {
             <SectionHeading
               eyebrow="SIG opérationnel"
               title="Carte de Bohicon"
-              description="Couches terrain reçues dans OpenStreetMap."
+              description="Couches terrain affichées sans fond cartographique."
             />
             <OperationalMap
               reports={[...state.depots, ...state.reports]}
