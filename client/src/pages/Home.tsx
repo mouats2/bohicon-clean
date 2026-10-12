@@ -540,6 +540,39 @@ function PublicHome({
   state: DemoState;
 }) {
   const arrondissementCount = state.administrativeAreas.length;
+  const terrainCount = state.depots.length;
+  const countProperty = (key: string, value: string) =>
+    state.depots.filter(
+      depot => String(depot.sourceProperties[key] ?? "").trim() === value
+    ).length;
+  const containsNature = (value: string) =>
+    state.depots.filter(depot =>
+      String(
+        depot.sourceProperties["Nature des déchets présents"] ?? ""
+      ).includes(value)
+    ).length;
+  const importantCount =
+    countProperty("Type de dépôt", "Dépôt important") +
+    countProperty("Type de dépôt", "Dépôt très important");
+  const establishedCount =
+    countProperty("Ancienneté estimée", "6 mois à 1 an") +
+    countProperty("Ancienneté estimée", "Plus d’un an");
+  const profile = {
+    small: countProperty("Type de dépôt", "Petit dépôt"),
+    medium: countProperty("Type de dépôt", "Dépôt moyen"),
+    important: importantCount,
+    established: establishedCount,
+    plastics: containsNature("Plastiques"),
+    vegetation: containsNature("Déchets végétaux"),
+    odors: countProperty("Présence d’odeurs", "Oui"),
+    vectors: countProperty("Présence d’animaux ou d’insectes", "Oui"),
+    burning: countProperty("Présence de fumée ou brûlage", "Oui"),
+    stagnantWater: countProperty("Présence d’eaux stagnantes", "Oui"),
+  };
+  const share = (value: number) =>
+    terrainCount
+      ? `${((value / terrainCount) * 100).toFixed(1).replace(".0", "")} %`
+      : "—";
   const chain = [
     ["01", "Signaler", "Documenter un dépôt et le localiser."],
     ["02", "Vérifier", "Qualifier la donnée et sa provenance."],
@@ -553,10 +586,13 @@ function PublicHome({
     ["10", "Optimiser", "Améliorer la décision à partir des données."],
   ];
   const stats = [
-    [String(state.depots.length), "dépôts sauvages recensés"],
+    [String(terrainCount), "dépôts sauvages recensés"],
     [String(arrondissementCount || "—"), "arrondissements couverts"],
-    [String(state.reports.length), "signalements citoyens enregistrés"],
-    [String(state.interventions.length), "interventions enregistrées"],
+    [String(profile.important), "dépôts importants ou très importants"],
+    [
+      terrainCount ? share(profile.established) : "—",
+      "installés depuis au moins 6 mois",
+    ],
   ];
   return (
     <div className="public-page">
@@ -669,6 +705,104 @@ function PublicHome({
               <span>{label}</span>
             </div>
           ))}
+        </section>
+        <section className="terrain-profile-section" id="profil-releve">
+          <div className="section-heading profile-heading">
+            <div>
+              <div className="eyebrow">Portrait du relevé corrigé</div>
+              <h2>188 dépôts, un profil de nuisances clairement documenté.</h2>
+            </div>
+            <span className="profile-source">
+              Source : fichier corrigé · 5 points « Zèko » exclus
+            </span>
+          </div>
+          <div className="profile-grid">
+            <article className="profile-card profile-size">
+              <span className="profile-kicker">Répartition par taille</span>
+              <strong>
+                {profile.small} petits · {profile.medium} moyens
+              </strong>
+              <p>
+                {profile.important} sites importants ou très importants, à
+                prioriser pour une intervention.
+              </p>
+              <div className="profile-bar">
+                <i
+                  style={{
+                    width: `${terrainCount ? (profile.small / terrainCount) * 100 : 0}%`,
+                  }}
+                />
+                <i
+                  style={{
+                    width: `${terrainCount ? (profile.medium / terrainCount) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              <small>
+                {share(profile.small + profile.medium)} petits ou moyens
+              </small>
+            </article>
+            <article className="profile-card profile-age">
+              <span className="profile-kicker">Ancienneté</span>
+              <strong>
+                {share(profile.established)} installés depuis 6 mois ou plus
+              </strong>
+              <p>
+                Ces sites peuvent signaler des phénomènes d’accumulation
+                récurrente, à confirmer par le suivi municipal.
+              </p>
+              <div className="profile-stat-row">
+                <span>
+                  Moins de 6 mois{" "}
+                  <b>
+                    {countProperty("Ancienneté estimée", "Moins de 6 mois")}
+                  </b>
+                </span>
+                <span>
+                  Indéterminée{" "}
+                  <b>{countProperty("Ancienneté estimée", "Indéterminée")}</b>
+                </span>
+              </div>
+            </article>
+            <article className="profile-card profile-waste">
+              <span className="profile-kicker">Déchets dominants</span>
+              <strong>
+                Plastiques présents sur {share(profile.plastics)} des dépôts
+              </strong>
+              <p>
+                Le profil type associe plastiques, végétaux, papiers/cartons et
+                déchets alimentaires.
+              </p>
+              <div className="profile-stat-row">
+                <span>
+                  Végétaux <b>{share(profile.vegetation)}</b>
+                </span>
+                <span>
+                  Alimentaires{" "}
+                  <b>{share(containsNature("Déchets alimentaires"))}</b>
+                </span>
+              </div>
+            </article>
+            <article className="profile-card profile-risk">
+              <span className="profile-kicker">Nuisances observées</span>
+              <strong>{share(profile.vectors)} avec animaux ou insectes</strong>
+              <p>
+                Les odeurs et le brûlage constituent des signaux de risque
+                sanitaire et d’incendie.
+              </p>
+              <div className="profile-stat-row">
+                <span>
+                  Odeurs <b>{share(profile.odors)}</b>
+                </span>
+                <span>
+                  Brûlage <b>{share(profile.burning)}</b>
+                </span>
+                <span>
+                  Eaux stagnantes <b>{share(profile.stagnantWater)}</b>
+                </span>
+              </div>
+            </article>
+          </div>
         </section>
         <section className="editorial-section" id="fonctionnement">
           <SectionHeading
