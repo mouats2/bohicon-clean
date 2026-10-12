@@ -3586,15 +3586,62 @@ function Analysis({ state }: { state: DemoState }) {
 
 function Intelligence({ state }: { state: DemoState }) {
   const [question, setQuestion] = useState("");
+  const [agentStatus, setAgentStatus] = useState<
+    "ready" | "loading" | "fallback"
+  >("ready");
+  const askMutation = trpc.intelligence.ask.useMutation();
+  const countSource = (key: string, value: string) =>
+    state.depots.filter(
+      depot => String(depot.sourceProperties[key] ?? "").trim() === value
+    ).length;
+  const countNature = (value: string) =>
+    state.depots.filter(depot =>
+      String(
+        depot.sourceProperties["Nature des déchets présents"] ?? ""
+      ).includes(value)
+    ).length;
+  const share = (value: number) =>
+    state.depots.length
+      ? `${((value / state.depots.length) * 100).toFixed(1).replace(".0", "")} %`
+      : "—";
+  const important = countSource("Type de dépôt", "Dépôt important");
+  const veryImportant = countSource("Type de dépôt", "Dépôt très important");
+  const established =
+    countSource("Ancienneté estimée", "6 mois à 1 an") +
+    countSource("Ancienneté estimée", "Plus d’un an");
   const [answer, setAnswer] = useState(
-    `Résumé des sources : ${state.depots.length} dépôt${state.depots.length > 1 ? "s" : ""} terrain recensé${state.depots.length > 1 ? "s" : ""} et ${state.reports.length} signalement${state.reports.length > 1 ? "s" : ""}. Les recommandations resteront limitées aux attributs réellement disponibles.`
+    `Agent IA prêt : ${state.depots.length} dépôts terrain sont disponibles. Posez une question sur les priorités, les nuisances ou les déchets dominants.`
   );
-  const ask = () => {
-    if (!question.trim()) return;
-    setAnswer(
-      `Lecture déterministe de « ${question} » : ${state.depots.length} dépôt${state.depots.length > 1 ? "s" : ""} terrain et ${state.reports.length} signalement${state.reports.length > 1 ? "s" : ""} sont disponibles. Aucune IA externe ni donnée inventée n’est utilisée ; cette réponse doit être vérifiée par le responsable.`
-    );
-    setQuestion("");
+  const ask = async () => {
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion || askMutation.isPending) return;
+    setAgentStatus("loading");
+    try {
+      const result = await askMutation.mutateAsync({
+        question: trimmedQuestion,
+        context: {
+          totalDeposits: state.depots.length,
+          importantDeposits: important,
+          veryImportantDeposits: veryImportant,
+          establishedShare: share(established),
+          plastics: countNature("Plastiques"),
+          vegetation: countNature("Déchets végétaux"),
+          odors: countSource("Présence d’odeurs", "Oui"),
+          vectors: countSource("Présence d’animaux ou d’insectes", "Oui"),
+          burning: countSource("Présence de fumée ou brûlage", "Oui"),
+          stagnantWater: countSource("Présence d’eaux stagnantes", "Oui"),
+        },
+      });
+      setAnswer(result.answer);
+      setAgentStatus("ready");
+    } catch {
+      setAnswer(
+        `L’agent IA n’est pas joignable pour le moment. Données locales disponibles : ${state.depots.length} dépôts, ${important + veryImportant} importants ou très importants, plastiques présents sur ${share(countNature("Plastiques"))} des sites et brûlage observé sur ${share(countSource("Présence de fumée ou brûlage", "Oui"))}.`
+      );
+      setAgentStatus("fallback");
+    } finally {
+      setQuestion("");
+    }
   };
   const priorityReports = state.depots
     .filter(report => report.priority === "Haute")
@@ -3604,8 +3651,16 @@ function Intelligence({ state }: { state: DemoState }) {
       <SectionHeading
         eyebrow="Assistance à la décision"
         title="Intelligence & recommandations"
-        description="Les recommandations restent adossées aux données terrain et n’inventent aucun site ou flux."
-        action={<Tag tone="purple">IA non connectée</Tag>}
+        description="L’agent IA analyse uniquement les statistiques vérifiées du relevé terrain et distingue les constats des propositions."
+        action={
+          <Tag tone={agentStatus === "fallback" ? "amber" : "purple"}>
+            {agentStatus === "loading"
+              ? "Analyse en cours…"
+              : agentStatus === "fallback"
+                ? "Mode données locales"
+                : "Agent IA actif"}
+          </Tag>
+        }
       />
       <div className="ai-layout">
         <div className="panel ai-chat-panel">
@@ -3615,7 +3670,7 @@ function Intelligence({ state }: { state: DemoState }) {
             </div>
             <div>
               <strong>Assistant Bohicon Clean</strong>
-              <span>Règles locales · aucune donnée fictive</span>
+              <span>Agent IA serveur · statistiques vérifiées</span>
             </div>
           </div>
           <div className="ai-answer">
@@ -3628,8 +3683,14 @@ function Intelligence({ state }: { state: DemoState }) {
               onChange={e => setQuestion(e.target.value)}
               onKeyDown={e => e.key === "Enter" && ask()}
               placeholder="Interroger les données terrain…"
+              disabled={askMutation.isPending}
             />
-            <button className="button button-primary" onClick={ask}>
+            <button
+              className="button button-primary"
+              onClick={ask}
+              disabled={askMutation.isPending}
+              aria-label="Interroger l’agent IA"
+            >
               <Send size={15} />
             </button>
           </div>
@@ -3666,7 +3727,6 @@ function Intelligence({ state }: { state: DemoState }) {
     </div>
   );
 }
-
 function GeoJSONImport({
   state,
   onImported,
