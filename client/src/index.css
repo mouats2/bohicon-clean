@@ -4064,119 +4064,42 @@ a {
     max-height: 260px;
   }
 }
-.terrain-profile-section {
-  padding: 66px 50px 76px;
-  background: #f7fbf6;
-}
-.profile-heading {
-  max-width: 1180px;
-  margin: 0 auto 24px;
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-}
-.profile-heading h2 {
-  max-width: 650px;
-  margin: 6px 0 0;
-}
-.profile-source {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.profile-grid {
-  max-width: 1180px;
-  margin: 0 auto;
+
+.geo-data-details {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
 }
-.profile-card {
-  min-height: 220px;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(1, 62, 63, 0.05);
-}
-.profile-kicker {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.profile-card strong {
-  display: block;
-  margin-top: 18px;
+.geo-data-group h3 {
+  margin: 0 0 8px;
   color: var(--deep-teal);
   font-family: "Space Grotesk";
-  font-size: 22px;
-  line-height: 1.15;
+  font-size: 13px;
 }
-.profile-card p {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.55;
+.geo-data-rows {
+  display: grid;
+  gap: 5px;
 }
-.profile-card small {
+.geo-data-rows span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 700;
+  line-height: 1.35;
 }
-.profile-bar {
-  display: flex;
-  height: 8px;
-  overflow: hidden;
-  margin: 22px 0 9px;
-  border-radius: 99px;
-  background: #edf2ed;
-}
-.profile-bar i:first-child {
-  background: var(--primary);
-}
-.profile-bar i:last-child {
-  background: var(--water-blue);
-}
-.profile-stat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 18px;
-}
-.profile-stat-row span {
-  padding: 7px 9px;
-  border-radius: 8px;
-  background: #f2f8f2;
-  color: var(--muted);
-  font-size: 9px;
-}
-.profile-stat-row b {
-  display: block;
-  margin-top: 3px;
+.geo-data-rows b {
   color: var(--deep-teal);
-  font-size: 12px;
-}
-@media (max-width: 1100px) {
-  .profile-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  font-size: 10px;
+  text-align: right;
 }
 @media (max-width: 680px) {
-  .terrain-profile-section {
-    padding: 48px 18px 55px;
+  .geo-data-rows span {
+    font-size: 9px;
   }
-  .profile-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .profile-source {
-    white-space: normal;
-  }
-  .profile-grid {
-    grid-template-columns: 1fr;
+  .geo-data-rows b {
+    font-size: 9px;
   }
 }
