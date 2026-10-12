@@ -539,36 +539,59 @@ function PublicHome({
   onRole: (role: Role, view?: ViewKey) => void;
   state: DemoState;
 }) {
-  const steps = [
-    ["01", "Signaler", "Un citoyen documente un dépôt et le localise."],
-    [
-      "02",
-      "Vérifier",
-      "La mairie qualifie, priorise et affecte une intervention.",
-    ],
-    [
-      "03",
-      "Collecter",
-      "Un collecteur transporte les matières vers un point identifié.",
-    ],
-    [
-      "04",
-      "Valoriser",
-      "Les flux triés deviennent des données et des ressources.",
-    ],
+  const arrondissementCount = state.administrativeAreas.length;
+  const chain = [
+    ["01", "Signaler", "Documenter un dépôt et le localiser."],
+    ["02", "Vérifier", "Qualifier la donnée et sa provenance."],
+    ["03", "Prioriser", "Identifier les secteurs nécessitant une action."],
+    ["04", "Intervenir", "Affecter une opération quand elle est confirmée."],
+    ["05", "Collecter", "Organiser le passage d’un collecteur autorisé."],
+    ["06", "Trier", "Séparer les matières selon les filières disponibles."],
+    ["07", "Regrouper", "Tracer les points de regroupement vérifiés."],
+    ["08", "Valoriser", "Orienter les matières vers une valorisation réelle."],
+    ["09", "Analyser", "Lire les concentrations et les écarts territoriaux."],
+    ["10", "Optimiser", "Améliorer la décision à partir des données."],
+  ];
+  const stats = [
+    [String(state.depots.length), "dépôts sauvages recensés"],
+    [String(arrondissementCount || "—"), "arrondissements couverts"],
+    [String(state.reports.length), "signalements citoyens enregistrés"],
+    [String(state.interventions.length), "interventions enregistrées"],
   ];
   return (
     <div className="public-page">
       <header className="public-header">
-        <Brand />
-        <nav>
+        <a href="#accueil" aria-label="BOHICON CLEAN · accueil">
+          <Brand />
+        </a>
+        <nav aria-label="Navigation principale">
+          <a href="#accueil">Accueil</a>
           <a href="#fonctionnement">Fonctionnement</a>
+          <a href="#donnees">Données & SIG</a>
           <a href="#parcours">Parcours</a>
           <a href="#apropos">À propos</a>
         </nav>
+        <details className="public-mobile-menu">
+          <summary aria-label="Ouvrir le menu mobile">
+            <Menu size={20} />
+          </summary>
+          <div className="public-mobile-links">
+            <a href="#accueil">Accueil</a>
+            <a href="#fonctionnement">Fonctionnement</a>
+            <a href="#donnees">Données & SIG</a>
+            <a href="#parcours">Parcours</a>
+            <a href="#apropos">À propos</a>
+          </div>
+        </details>
         <div className="public-actions">
           <button
             className="button button-ghost"
+            onClick={() => onRole("collector", "training")}
+          >
+            Devenir collecteur <Recycle size={15} />
+          </button>
+          <button
+            className="button button-primary"
             onClick={() => onRole("citizen", "report")}
           >
             Signaler un dépôt <ArrowUpRight size={15} />
@@ -582,7 +605,7 @@ function PublicHome({
         </div>
       </header>
       <main>
-        <section className="hero-section">
+        <section className="hero-section" id="accueil">
           <div className="hero-copy">
             <DemoNotice>
               Aucune statistique fictive · données terrain prioritaires
@@ -591,9 +614,9 @@ function PublicHome({
               Une ville propre commence par une <em>action visible.</em>
             </h1>
             <p className="hero-lead">
-              BOHICON CLEAN relie les habitants, les collecteurs et la mairie
-              pour transformer chaque signalement en décision, puis en résultat
-              mesurable.
+              BOHICON CLEAN relie habitants, collecteurs et mairie pour
+              signaler, vérifier, prioriser et suivre la gestion des déchets à
+              Bohicon.
             </p>
             <div className="hero-actions">
               <button
@@ -609,11 +632,19 @@ function PublicHome({
                 Devenir collecteur <ChevronRight size={16} />
               </button>
             </div>
-            <div className="hero-proof">
-              <div>
-                <strong>Couche terrain disponible</strong>
-                <small>188 dépôts · 10 limites administratives</small>
-              </div>
+            <div className="hero-mission-grid">
+              <span>
+                <MapPinned size={15} /> Localiser les dépôts sauvages
+              </span>
+              <span>
+                <Route size={15} /> Suivre les interventions
+              </span>
+              <span>
+                <Recycle size={15} /> Favoriser le tri et la valorisation
+              </span>
+              <span>
+                <Target size={15} /> Aider la mairie à prioriser
+              </span>
             </div>
           </div>
           <div className="hero-visual">
@@ -630,32 +661,22 @@ function PublicHome({
             />
           </div>
         </section>
-        <section className="stat-strip">
-          <div>
-            <strong>188</strong>
-            <span>dépôts terrain reçus</span>
-          </div>
-          <div>
-            <strong>10</strong>
-            <span>limites administratives</span>
-          </div>
-          <div>
-            <strong>0</strong>
-            <span>collecte fictive conservée</span>
-          </div>
-          <div>
-            <strong>0</strong>
-            <span>indicateur inventé</span>
-          </div>
+        <section className="stat-strip" aria-label="Données disponibles">
+          {stats.map(([value, label]) => (
+            <div key={label}>
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </div>
+          ))}
         </section>
         <section className="editorial-section" id="fonctionnement">
           <SectionHeading
             eyebrow="Le cycle BOHICON CLEAN"
-            title="Du terrain à la décision."
-            description="Les données reçues sont affichées avec leur provenance ; aucune valeur opérationnelle n’est inventée en l’absence de source."
+            title="Du terrain à la décision, sans inventer les résultats."
+            description="Les données reçues conservent leur provenance. Les étapes opérationnelles restent présentées comme des capacités tant qu’elles ne sont pas alimentées par des sources vérifiées."
           />
-          <div className="step-grid">
-            {steps.map(([number, title, body]) => (
+          <div className="step-grid chain-grid">
+            {chain.map(([number, title, body]) => (
               <div className="step-card" key={number}>
                 <span>{number}</span>
                 <div className="step-icon">
@@ -668,16 +689,30 @@ function PublicHome({
             ))}
           </div>
         </section>
-        <section className="split-section">
+        <section className="split-section" id="donnees">
           <div>
-            <div className="eyebrow">Une lecture commune du territoire</div>
+            <div className="eyebrow">Données & intelligence géospatiale</div>
             <h2>Les données ne restent pas dans un tableau.</h2>
             <p>
-              Les dépôts et limites reçus sont affichés sans fond
-              cartographique, avec leur provenance. Les flux de collecte
-              apparaîtront uniquement après réception de données
-              opérationnelles.
+              La plateforme localise les dépôts, les rattache aux
+              arrondissements, révèle les concentrations et prépare une lecture
+              des secteurs prioritaires. Aucun point de regroupement ou résultat
+              de collecte n’est présenté comme réel sans donnée vérifiée.
             </p>
+            <div className="capability-list">
+              <span>
+                <CheckCircle2 size={15} /> Dépôts par arrondissement
+              </span>
+              <span>
+                <CheckCircle2 size={15} /> Concentrations et zones prioritaires
+              </span>
+              <span>
+                <CheckCircle2 size={15} /> Accessibilité et suivi géographique
+              </span>
+              <span>
+                <ShieldCheck size={15} /> Provenance et qualité des sources
+              </span>
+            </div>
             <button
               className="text-button"
               onClick={() => onRole("mairie", "overview")}
@@ -687,8 +722,8 @@ function PublicHome({
           </div>
           <div className="category-panel">
             <div className="panel-title">
-              <span>Catégories source</span>
-              <Tag tone="green">En attente d’analyse</Tag>
+              <span>Lecture des sources</span>
+              <Tag tone="green">{state.depots.length} dépôts terrain</Tag>
             </div>
             {CATEGORIES.map((category, index) => (
               <div className="category-row" key={category}>
@@ -699,15 +734,19 @@ function PublicHome({
                 <div className="category-bar">
                   <i style={{ width: "0%" }} />
                 </div>
-                <strong>—</strong>
+                <strong>Non calculé</strong>
               </div>
             ))}
+            <small className="data-note">
+              Les volumes par catégorie seront calculés après validation des
+              attributs source.
+            </small>
           </div>
         </section>
         <section className="journey-section" id="parcours">
           <SectionHeading
             eyebrow="Trois parcours, une même mission"
-            title="Chacun voit ce qui lui permet d’agir."
+            title="Chaque acteur dispose d’un chemin clair pour agir."
           />
           <div className="journey-grid">
             <button
@@ -720,8 +759,8 @@ function PublicHome({
               </div>
               <h3>Je signale, je suis, je contribue.</h3>
               <p>
-                Un parcours mobile-first pour documenter un dépôt, suivre sa
-                résolution et gagner des points d’engagement.
+                Documenter un dépôt, ajouter une photo, localiser le site,
+                suivre le traitement et consulter son historique.
               </p>
               <span className="journey-link">
                 Ouvrir l’espace citoyen <ChevronRight size={15} />
@@ -737,8 +776,8 @@ function PublicHome({
               </div>
               <h3>Je collecte, je pèse, je valorise.</h3>
               <p>
-                Formation, sécurité, points de regroupement, pesées vérifiées et
-                gains transparents.
+                Se former, être autorisé, déclarer les opérations, enregistrer
+                les quantités et suivre les gains vérifiés.
               </p>
               <span className="journey-link">
                 Ouvrir l’espace collecteur <ChevronRight size={15} />
@@ -754,8 +793,8 @@ function PublicHome({
               </div>
               <h3>Je vois, je priorise, je décide.</h3>
               <p>
-                Une vue opérationnelle pour relier les signalements, les
-                interventions, la collecte et l’analyse spatiale.
+                Valider les signalements, gérer les interventions, suivre les
+                collecteurs, analyser les secteurs et produire des rapports.
               </p>
               <span className="journey-link">
                 Ouvrir le pilotage mairie <ChevronRight size={15} />
@@ -770,35 +809,46 @@ function PublicHome({
           </div>
           <div>
             <div className="eyebrow">À propos du projet</div>
-            <h2>Un prototype de génie urbain, ancré dans le réel.</h2>
+            <h2>Un prototype participatif, ancré dans le réel de Bohicon.</h2>
             <p>
-              BOHICON CLEAN est conçu comme une démonstration scientifique et
-              fonctionnelle : les données de terrain à venir resteront
-              prioritaires, traçables et distinctes des hypothèses de
-              simulation.
+              BOHICON CLEAN expérimente une approche numérique de gestion des
+              déchets solides ménagers : les citoyens documentent, les
+              collecteurs agissent, la mairie qualifie et décide. Les SIG
+              structurent la lecture du territoire ; l’IA pourra ensuite aider à
+              comparer les priorités, sans remplacer le jugement municipal.
+            </p>
+            <p>
+              Le projet distingue systématiquement les données terrain, les
+              données opérationnelles et les fonctions expérimentales. Son
+              objectif est de rendre les décisions plus traçables, plus
+              participatives et plus utiles.
             </p>
             <div className="about-pills">
               <Tag tone="green">Local-first</Tag>
-              <Tag tone="blue">Cartographie</Tag>
+              <Tag tone="blue">SIG & données</Tag>
               <Tag tone="amber">Décision assistée</Tag>
-              <Tag>PostGIS-ready</Tag>
+              <Tag>Prototype expérimental</Tag>
             </div>
           </div>
         </section>
       </main>
       <footer className="public-footer">
-        <Brand compact />
+        <a href="#accueil" aria-label="Retour à l’accueil">
+          <Brand compact />
+        </a>
         <div>
-          <span>Contact projet</span>
-          <span>Confidentialité</span>
-          <span>Conditions d’utilisation</span>
+          <a href="#donnees">Données & méthode</a>
+          <a href="#apropos">À propos</a>
+          <a href="#fonctionnement">Fonctionnement</a>
         </div>
-        <small>© 2026 BOHICON CLEAN · Démonstration académique</small>
+        <small>
+          © 2026 BOHICON CLEAN · Prototype académique · données terrain
+          prioritaires
+        </small>
       </footer>
     </div>
   );
 }
-
 function AppShell({
   role,
   view,
