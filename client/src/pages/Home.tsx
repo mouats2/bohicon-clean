@@ -2495,6 +2495,11 @@ function MairieOverview({
     item => !["Traité", "Rejeté", "Doublon"].includes(item.status)
   ).length;
   const highDeposits = state.depots.filter(item => item.priority === "Haute");
+  const importantDeposits = state.depots.filter(item =>
+    ["Dépôt important", "Dépôt très important"].includes(
+      String(item.sourceProperties["Type de dépôt"] ?? "").trim()
+    )
+  );
   const countSource = (key: string, value: string) =>
     state.depots.filter(
       depot => String(depot.sourceProperties[key] ?? "").trim() === value
@@ -2810,13 +2815,13 @@ function MairieOverview({
           <div className="panel-header">
             <div>
               <div className="eyebrow">À examiner</div>
-              <h3>Sites prioritaires</h3>
+              <h3>Dépôts importants</h3>
             </div>
             <button className="text-button" onClick={() => onView("deposits")}>
               Voir tous <ChevronRight size={14} />
             </button>
           </div>
-          {highDeposits.slice(0, 3).map(depot => (
+          {importantDeposits.slice(0, 3).map(depot => (
             <div className="priority-row" key={depot.id}>
               <div className="priority-score">
                 {depot.severity === "Élevée" ? "A" : "B"}
@@ -2824,7 +2829,11 @@ function MairieOverview({
               <div>
                 <strong>{depot.location}</strong>
                 <span>
-                  {depot.id} · {depot.arrondissementSource}
+                  {depot.id} ·{" "}
+                  {String(
+                    depot.sourceProperties["Type de dépôt"] ?? "Dépôt important"
+                  )}{" "}
+                  · {depot.arrondissementSource}
                 </span>
               </div>
               <span className="source-note-inline">Inventaire</span>
@@ -2833,12 +2842,15 @@ function MairieOverview({
           {!highDeposits.length && (
             <div className="empty-state">
               <Target size={20} />
-              <p>Aucun site de priorité haute dans les données disponibles.</p>
+              <p>
+                Aucun dépôt important ou très important dans les données
+                disponibles.
+              </p>
             </div>
           )}
           <div className="priority-footer">
-            <Sparkles size={14} /> Priorité descriptive basée sur les attributs
-            source ; elle doit être confirmée.
+            <Sparkles size={14} /> 26 dépôts importants ou très importants dans
+            le relevé ; la priorité opérationnelle doit être confirmée.
           </div>
         </div>
       </div>
