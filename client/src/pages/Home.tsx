@@ -360,14 +360,17 @@ function OperationalMap({
       [7.318881730366753, 2.197265625],
     ]);
     map.setMaxBounds(osmBounds);
-    L.tileLayer("/data/osm/{z}/{x}/{y}.png", {
-      minZoom: 12,
-      maxZoom: 17,
-      minNativeZoom: 13,
-      maxNativeZoom: 13,
-      noWrap: true,
-      attribution: "© OpenStreetMap France · contributeurs OpenStreetMap",
-    }).addTo(map);
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        subdomains: "abcd",
+        minZoom: 12,
+        maxZoom: 19,
+        noWrap: true,
+        attribution:
+          '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · © <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>',
+      }
+    ).addTo(map);
     const bounds = L.latLngBounds([]);
     importedLayers
       .filter(layer => !layer.fileName.toLowerCase().includes("depot"))
@@ -442,7 +445,7 @@ function OperationalMap({
           <Tag tone="green">Terrain + signalements</Tag>
         </div>
         <div className="map-tools">
-          <span className="map-source-label">© OSM</span>
+          <span className="map-source-label">CARTO Voyager</span>
         </div>
       </div>
       <div className="map-canvas">
