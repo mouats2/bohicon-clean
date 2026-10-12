@@ -732,7 +732,7 @@ function PublicHome({
             ))}
           </div>
         </section>
-        <section className="split-section" id="donnees">
+        <section className="split-section geo-section" id="donnees">
           <div>
             <div className="eyebrow">Données & intelligence géospatiale</div>
             <h2>Les données ne restent pas dans un tableau.</h2>
@@ -763,187 +763,155 @@ function PublicHome({
               Explorer le pilotage municipal <ArrowUpRight size={15} />
             </button>
           </div>
-          <div className="category-panel">
-            <div className="panel-title">
-              <span>Lecture des sources</span>
-              <Tag tone="green">{state.depots.length} dépôts terrain</Tag>
+          <div className="geo-data-details">
+            <div className="geo-data-group">
+              <h3>Répartition par taille</h3>
+              <div className="geo-data-rows">
+                <span>
+                  Petit dépôt{" "}
+                  <b>
+                    {profile.small} · {share(profile.small)}
+                  </b>
+                </span>
+                <span>
+                  Dépôt moyen{" "}
+                  <b>
+                    {profile.medium} · {share(profile.medium)}
+                  </b>
+                </span>
+                <span>
+                  Dépôt important{" "}
+                  <b>
+                    {countProperty("Type de dépôt", "Dépôt important")} ·{" "}
+                    {share(countProperty("Type de dépôt", "Dépôt important"))}
+                  </b>
+                </span>
+                <span>
+                  Très important{" "}
+                  <b>
+                    {countProperty("Type de dépôt", "Dépôt très important")} ·{" "}
+                    {share(
+                      countProperty("Type de dépôt", "Dépôt très important")
+                    )}
+                  </b>
+                </span>
+              </div>
             </div>
-            {CATEGORIES.map((category, index) => (
-              <div className="category-row" key={category}>
-                <div className={`category-icon cat-${index}`}>
-                  <Recycle size={15} />
-                </div>
-                <span>{category}</span>
-                <div className="category-bar">
-                  <i style={{ width: "0%" }} />
-                </div>
-                <strong>Non calculé</strong>
+            <div className="geo-data-group">
+              <h3>Ancienneté estimée</h3>
+              <div className="geo-data-rows">
+                <span>
+                  Moins de 6 mois{" "}
+                  <b>
+                    {countProperty("Ancienneté estimée", "Moins de 6 mois")} ·{" "}
+                    {share(
+                      countProperty("Ancienneté estimée", "Moins de 6 mois")
+                    )}
+                  </b>
+                </span>
+                <span>
+                  6 mois à 1 an{" "}
+                  <b>
+                    {countProperty("Ancienneté estimée", "6 mois à 1 an")} ·{" "}
+                    {share(
+                      countProperty("Ancienneté estimée", "6 mois à 1 an")
+                    )}
+                  </b>
+                </span>
+                <span>
+                  Plus d’un an{" "}
+                  <b>
+                    {countProperty("Ancienneté estimée", "Plus d’un an")} ·{" "}
+                    {share(countProperty("Ancienneté estimée", "Plus d’un an"))}
+                  </b>
+                </span>
+                <span>
+                  Indéterminée{" "}
+                  <b>
+                    {countProperty("Ancienneté estimée", "Indéterminée")} ·{" "}
+                    {share(countProperty("Ancienneté estimée", "Indéterminée"))}
+                  </b>
+                </span>
               </div>
-            ))}
-            <small className="data-note">
-              Les volumes par catégorie seront calculés après validation des
-              attributs source. Les indicateurs ci-dessous proviennent du relevé
-              corrigé ; 5 points « Zèko » ont été exclus.
-            </small>
-            <div className="geo-data-details">
-              <div className="geo-data-group">
-                <h3>Répartition par taille</h3>
-                <div className="geo-data-rows">
-                  <span>
-                    Petit dépôt{" "}
-                    <b>
-                      {profile.small} · {share(profile.small)}
-                    </b>
-                  </span>
-                  <span>
-                    Dépôt moyen{" "}
-                    <b>
-                      {profile.medium} · {share(profile.medium)}
-                    </b>
-                  </span>
-                  <span>
-                    Dépôt important{" "}
-                    <b>
-                      {countProperty("Type de dépôt", "Dépôt important")} ·{" "}
-                      {share(countProperty("Type de dépôt", "Dépôt important"))}
-                    </b>
-                  </span>
-                  <span>
-                    Très important{" "}
-                    <b>
-                      {countProperty("Type de dépôt", "Dépôt très important")} ·{" "}
-                      {share(
-                        countProperty("Type de dépôt", "Dépôt très important")
-                      )}
-                    </b>
-                  </span>
-                </div>
+            </div>
+            <div className="geo-data-group">
+              <h3>Déchets présents</h3>
+              <div className="geo-data-rows">
+                <span>
+                  Plastiques{" "}
+                  <b>
+                    {profile.plastics} · {share(profile.plastics)}
+                  </b>
+                </span>
+                <span>
+                  Végétaux{" "}
+                  <b>
+                    {profile.vegetation} · {share(profile.vegetation)}
+                  </b>
+                </span>
+                <span>
+                  Papiers / cartons{" "}
+                  <b>
+                    {containsNature("Papiers/cartons")} ·{" "}
+                    {share(containsNature("Papiers/cartons"))}
+                  </b>
+                </span>
+                <span>
+                  Alimentaires{" "}
+                  <b>
+                    {containsNature("Déchets alimentaires")} ·{" "}
+                    {share(containsNature("Déchets alimentaires"))}
+                  </b>
+                </span>
+                <span>
+                  Activités commerciales{" "}
+                  <b>
+                    {containsNature("Déchets issus des activités commerciales")}{" "}
+                    ·{" "}
+                    {share(
+                      containsNature("Déchets issus des activités commerciales")
+                    )}
+                  </b>
+                </span>
+                <span>
+                  Métaux · verre · gravats{" "}
+                  <b>
+                    {containsNature("Métaux")} ·{" "}
+                    {share(containsNature("Métaux"))} ·{" "}
+                    {containsNature("Verre")} · {share(containsNature("Verre"))}{" "}
+                    · {containsNature("Gravats")} ·{" "}
+                    {share(containsNature("Gravats"))}
+                  </b>
+                </span>
               </div>
-              <div className="geo-data-group">
-                <h3>Ancienneté estimée</h3>
-                <div className="geo-data-rows">
-                  <span>
-                    Moins de 6 mois{" "}
-                    <b>
-                      {countProperty("Ancienneté estimée", "Moins de 6 mois")} ·{" "}
-                      {share(
-                        countProperty("Ancienneté estimée", "Moins de 6 mois")
-                      )}
-                    </b>
-                  </span>
-                  <span>
-                    6 mois à 1 an{" "}
-                    <b>
-                      {countProperty("Ancienneté estimée", "6 mois à 1 an")} ·{" "}
-                      {share(
-                        countProperty("Ancienneté estimée", "6 mois à 1 an")
-                      )}
-                    </b>
-                  </span>
-                  <span>
-                    Plus d’un an{" "}
-                    <b>
-                      {countProperty("Ancienneté estimée", "Plus d’un an")} ·{" "}
-                      {share(
-                        countProperty("Ancienneté estimée", "Plus d’un an")
-                      )}
-                    </b>
-                  </span>
-                  <span>
-                    Indéterminée{" "}
-                    <b>
-                      {countProperty("Ancienneté estimée", "Indéterminée")} ·{" "}
-                      {share(
-                        countProperty("Ancienneté estimée", "Indéterminée")
-                      )}
-                    </b>
-                  </span>
-                </div>
-              </div>
-              <div className="geo-data-group">
-                <h3>Déchets présents</h3>
-                <div className="geo-data-rows">
-                  <span>
-                    Plastiques{" "}
-                    <b>
-                      {profile.plastics} · {share(profile.plastics)}
-                    </b>
-                  </span>
-                  <span>
-                    Végétaux{" "}
-                    <b>
-                      {profile.vegetation} · {share(profile.vegetation)}
-                    </b>
-                  </span>
-                  <span>
-                    Papiers / cartons{" "}
-                    <b>
-                      {containsNature("Papiers/cartons")} ·{" "}
-                      {share(containsNature("Papiers/cartons"))}
-                    </b>
-                  </span>
-                  <span>
-                    Alimentaires{" "}
-                    <b>
-                      {containsNature("Déchets alimentaires")} ·{" "}
-                      {share(containsNature("Déchets alimentaires"))}
-                    </b>
-                  </span>
-                  <span>
-                    Activités commerciales{" "}
-                    <b>
-                      {containsNature(
-                        "Déchets issus des activités commerciales"
-                      )}{" "}
-                      ·{" "}
-                      {share(
-                        containsNature(
-                          "Déchets issus des activités commerciales"
-                        )
-                      )}
-                    </b>
-                  </span>
-                  <span>
-                    Métaux · verre · gravats{" "}
-                    <b>
-                      {containsNature("Métaux")} ·{" "}
-                      {share(containsNature("Métaux"))} ·{" "}
-                      {containsNature("Verre")} ·{" "}
-                      {share(containsNature("Verre"))} ·{" "}
-                      {containsNature("Gravats")} ·{" "}
-                      {share(containsNature("Gravats"))}
-                    </b>
-                  </span>
-                </div>
-              </div>
-              <div className="geo-data-group">
-                <h3>Nuisances observées</h3>
-                <div className="geo-data-rows">
-                  <span>
-                    Animaux / insectes{" "}
-                    <b>
-                      {profile.vectors} · {share(profile.vectors)}
-                    </b>
-                  </span>
-                  <span>
-                    Odeurs{" "}
-                    <b>
-                      {profile.odors} · {share(profile.odors)}
-                    </b>
-                  </span>
-                  <span>
-                    Fumée / brûlage{" "}
-                    <b>
-                      {profile.burning} · {share(profile.burning)}
-                    </b>
-                  </span>
-                  <span>
-                    Eaux stagnantes{" "}
-                    <b>
-                      {profile.stagnantWater} · {share(profile.stagnantWater)}
-                    </b>
-                  </span>
-                </div>
+            </div>
+            <div className="geo-data-group">
+              <h3>Nuisances observées</h3>
+              <div className="geo-data-rows">
+                <span>
+                  Animaux / insectes{" "}
+                  <b>
+                    {profile.vectors} · {share(profile.vectors)}
+                  </b>
+                </span>
+                <span>
+                  Odeurs{" "}
+                  <b>
+                    {profile.odors} · {share(profile.odors)}
+                  </b>
+                </span>
+                <span>
+                  Fumée / brûlage{" "}
+                  <b>
+                    {profile.burning} · {share(profile.burning)}
+                  </b>
+                </span>
+                <span>
+                  Eaux stagnantes{" "}
+                  <b>
+                    {profile.stagnantWater} · {share(profile.stagnantWater)}
+                  </b>
+                </span>
               </div>
             </div>
           </div>
