@@ -2641,7 +2641,6 @@ function MairieOverview({
             <div className="eyebrow">Lecture du relevé corrigé</div>
             <h2>Les chiffres utiles pour prioriser.</h2>
           </div>
-          <span>188 dépôts terrain · 5 points « Zèko » exclus</span>
         </div>
         <div className="mairie-data-brief-grid">
           <article>
