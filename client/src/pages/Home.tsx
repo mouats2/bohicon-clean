@@ -2498,6 +2498,31 @@ function MairieOverview({
     name: category.split(" ")[0],
     value: records.filter(record => record.category === category).length,
   }));
+  const countSource = (key: string, value: string) =>
+    state.depots.filter(
+      depot => String(depot.sourceProperties[key] ?? "").trim() === value
+    ).length;
+  const countNature = (value: string) =>
+    state.depots.filter(depot =>
+      String(
+        depot.sourceProperties["Nature des déchets présents"] ?? ""
+      ).includes(value)
+    ).length;
+  const surveyShare = (value: number) =>
+    state.depots.length
+      ? `${((value / state.depots.length) * 100).toFixed(1).replace(".0", "")} %`
+      : "—";
+  const smallMedium =
+    countSource("Type de dépôt", "Petit dépôt") +
+    countSource("Type de dépôt", "Dépôt moyen");
+  const established =
+    countSource("Ancienneté estimée", "6 mois à 1 an") +
+    countSource("Ancienneté estimée", "Plus d’un an");
+  const surveyNuisance = {
+    vectors: countSource("Présence d’animaux ou d’insectes", "Oui"),
+    odors: countSource("Présence d’odeurs", "Oui"),
+    burning: countSource("Présence de fumée ou brûlage", "Oui"),
+  };
   const trendData = Array.from(
     new Set(
       state.reports
@@ -2589,6 +2614,66 @@ function MairieOverview({
           tone="blue"
         />
       </div>
+      <section
+        className="mairie-data-brief"
+        aria-label="Statistiques du relevé corrigé"
+      >
+        <div className="mairie-data-brief-header">
+          <div>
+            <div className="eyebrow">Lecture du relevé corrigé</div>
+            <h2>Les chiffres utiles pour prioriser.</h2>
+          </div>
+          <span>188 dépôts terrain · 5 points « Zèko » exclus</span>
+        </div>
+        <div className="mairie-data-brief-grid">
+          <article>
+            <span>Dimension des sites</span>
+            <strong>
+              {smallMedium} <small>({surveyShare(smallMedium)})</small>
+            </strong>
+            <p>
+              petits ou moyens ·{" "}
+              {countSource("Type de dépôt", "Dépôt important") +
+                countSource("Type de dépôt", "Dépôt très important")}{" "}
+              importants ou très importants
+            </p>
+          </article>
+          <article>
+            <span>Ancienneté</span>
+            <strong>
+              {surveyShare(established)} <small>installés depuis 6 mois+</small>
+            </strong>
+            <p>
+              {countSource("Ancienneté estimée", "Plus d’un an")} sites ont plus
+              d’un an · {countSource("Ancienneté estimée", "Indéterminée")}{" "}
+              indéterminé
+            </p>
+          </article>
+          <article>
+            <span>Déchets dominants</span>
+            <strong>
+              {countNature("Plastiques")} <small>plastiques · 100 %</small>
+            </strong>
+            <p>
+              {countNature("Déchets végétaux")} végétaux (
+              {surveyShare(countNature("Déchets végétaux"))}) ·{" "}
+              {countNature("Déchets alimentaires")} alimentaires (
+              {surveyShare(countNature("Déchets alimentaires"))})
+            </p>
+          </article>
+          <article>
+            <span>Nuisances à surveiller</span>
+            <strong>
+              {surveyShare(surveyNuisance.vectors)}{" "}
+              <small>animaux / insectes</small>
+            </strong>
+            <p>
+              Odeurs {surveyShare(surveyNuisance.odors)} · brûlage{" "}
+              {surveyShare(surveyNuisance.burning)}
+            </p>
+          </article>
+        </div>
+      </section>
       <div className="dashboard-grid">
         <div className="panel chart-panel">
           <div className="panel-header">
