@@ -65,6 +65,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart as RechartsLineChart,
   ResponsiveContainer,
@@ -2494,10 +2495,6 @@ function MairieOverview({
     item => !["Traité", "Rejeté", "Doublon"].includes(item.status)
   ).length;
   const highDeposits = state.depots.filter(item => item.priority === "Haute");
-  const categoryData = CATEGORIES.slice(0, 5).map(category => ({
-    name: category.split(" ")[0],
-    value: records.filter(record => record.category === category).length,
-  }));
   const countSource = (key: string, value: string) =>
     state.depots.filter(
       depot => String(depot.sourceProperties[key] ?? "").trim() === value
@@ -2508,6 +2505,13 @@ function MairieOverview({
         depot.sourceProperties["Nature des déchets présents"] ?? ""
       ).includes(value)
     ).length;
+  const categoryData = [
+    ["Plastiques", "Plastiques"],
+    ["Végétaux", "Déchets végétaux"],
+    ["Papiers/cartons", "Papiers/cartons"],
+    ["Alimentaires", "Déchets alimentaires"],
+    ["Activités commerciales", "Déchets issus des activités commerciales"],
+  ].map(([name, source]) => ({ name, value: countNature(source) }));
   const surveyShare = (value: number) =>
     state.depots.length
       ? `${((value / state.depots.length) * 100).toFixed(1).replace(".0", "")} %`
@@ -2734,9 +2738,9 @@ function MairieOverview({
           <div className="panel-header">
             <div>
               <div className="eyebrow">Répartition source</div>
-              <h3>Catégories observées</h3>
+              <h3>Types de déchets présents</h3>
             </div>
-            <Tag tone="green">Dépôts + signalements</Tag>
+            <Tag tone="green">188 dépôts · multi-nature</Tag>
           </div>
           <ResponsiveContainer width="100%" height={230}>
             <BarChart
@@ -2767,7 +2771,18 @@ function MairieOverview({
                   fontSize: 12,
                 }}
               />
-              <Bar dataKey="value" name="Occurrences" radius={[6, 6, 0, 0]}>
+              <Bar
+                dataKey="value"
+                name="Dépôts concernés"
+                radius={[6, 6, 0, 0]}
+              >
+                <LabelList
+                  dataKey="value"
+                  position="top"
+                  fill="#013E3F"
+                  fontSize={10}
+                  fontWeight={700}
+                />
                 {categoryData.map((_, index) => (
                   <Cell
                     key={index}
