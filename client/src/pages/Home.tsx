@@ -180,9 +180,10 @@ function OperationalMap({ reports, hubs: _hubs, interventions: _interventions, i
   const mapNode = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!mapNode.current) return;
-    const map = L.map(mapNode.current, { zoomControl: true, attributionControl: true }).setView([7.18, 2.06], compact ? 13 : 12);
-    map.attributionControl.addAttribution("© OpenStreetMap France · contributeurs OpenStreetMap");
-    L.imageOverlay("/data/osm/bohicon-z13-mosaic.jpg", [[7.057282352971572, 1.93359375], [7.318881730366753, 2.197265625]], { opacity: 1, interactive: false }).addTo(map);
+    const map = L.map(mapNode.current, { zoomControl: true, attributionControl: true, maxBoundsViscosity: 0.65 }).setView([7.18, 2.06], 13);
+    const osmBounds = L.latLngBounds([[7.057282352971572, 1.93359375], [7.318881730366753, 2.197265625]]);
+    map.setMaxBounds(osmBounds);
+    L.tileLayer("/data/osm/{z}/{x}/{y}.png", { minZoom: 12, maxZoom: 17, minNativeZoom: 13, maxNativeZoom: 13, noWrap: true, attribution: "© OpenStreetMap France · contributeurs OpenStreetMap" }).addTo(map);
     const bounds = L.latLngBounds([]);
     importedLayers.filter(layer => !layer.fileName.toLowerCase().includes("depot")).forEach(layer => {
       const geoLayer = L.geoJSON(layer.geojson as any, { style: { color: "#0e4f3c", weight: 2, fillColor: "#8bbd78", fillOpacity: 0.12 } }).addTo(map);
