@@ -72,8 +72,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { Toaster, toast } from "sonner";
 import {
   CATEGORIES,
@@ -347,85 +345,99 @@ function OperationalMap({
   editablePosition?: [number, number] | null;
   onPositionChange?: (position: [number, number]) => void;
 }) {
-  const mapNode = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!mapNode.current) return;
-    const map = L.map(mapNode.current, {
-      zoomControl: true,
-      attributionControl: true,
-      maxBoundsViscosity: 0.65,
-    }).setView([7.18, 2.06], 13);
-    const osmBounds = L.latLngBounds([
-      [7.057282352971572, 1.93359375],
-      [7.318881730366753, 2.197265625],
-    ]);
-    map.setMaxBounds(osmBounds);
-    const bounds = L.latLngBounds([]);
-    importedLayers
-      .filter(layer => !layer.fileName.toLowerCase().includes("depot"))
-      .forEach(layer => {
-        const geoLayer = L.geoJSON(layer.geojson as any, {
-          style: {
-            color: "#0e4f3c",
-            weight: 2,
-            fillColor: "#8bbd78",
-            fillOpacity: 0.12,
-          },
-        }).addTo(map);
-        bounds.extend(geoLayer.getBounds());
-      });
-    const visibleReports = compact ? reports.slice(0, 6) : reports;
-    visibleReports.forEach(report => {
-      const isDepot = report.entityType === "depot";
-      const color = isDepot ? "#3e7898" : "#c65d51";
-      const marker = L.circleMarker([report.lat, report.lng], {
-        radius: compact ? 5 : 6,
-        color,
-        fillColor: color,
-        fillOpacity: 0.86,
-        weight: 2,
-      });
-      marker.bindPopup(
-        `<strong>${report.id}</strong><br>${report.location}<br><small>${isDepot ? "Dépôt recensé · source terrain" : "Signalement citoyen"}</small>`
-      );
-      marker.on("click", () => onSelect?.(report));
-      marker.addTo(map);
-      bounds.extend([report.lat, report.lng]);
+  const width = 1000;
+  const height = compact ? 360 : 500;
+  const boundaryFeatures = importedLayers.flatMap(layer => {
+    const input = layer.geojson as any;
+    return (input?.features ?? []).filter((feature: any) => {
+      const type = feature?.geometry?.type;
+      return type === "Polygon" || type === "MultiPolygon";
     });
+  });
+  const coordinates = reports.flatMap(report => [[report.lng, report.lat]]) as [
+    number,
+    number,
+  ][];
+  const collectCoordinates = (value: any): [number, number][] => {
+    if (!Array.isArray(value)) return [];
     if (
-      editablePosition &&
-      Number.isFinite(editablePosition[0]) &&
-      Number.isFinite(editablePosition[1])
+      value.length >= 2 &&
+      typeof value[0] === "number" &&
+      typeof value[1] === "number"
     ) {
-      const marker = L.marker(editablePosition, {
-        draggable: Boolean(onPositionChange),
-      }).addTo(map);
-      marker
-        .bindPopup(
-          "Position du signalement · déplacez le marqueur si nécessaire"
-        )
-        .openPopup();
-      marker.on("dragend", event => {
-        const position = (event.target as L.Marker).getLatLng();
-        onPositionChange?.([position.lat, position.lng]);
-      });
-      map.setView(editablePosition, 16);
-      bounds.extend(editablePosition);
+      return [[value[0], value[1]]];
     }
-    if (bounds.isValid() && !editablePosition)
-      map.fitBounds(bounds.pad(0.12), { maxZoom: compact ? 14 : 15 });
-    setTimeout(() => map.invalidateSize(), 80);
-    return () => {
-      map.remove();
-    };
-  }, [
-    reports,
-    importedLayers,
-    compact,
-    onSelect,
-    editablePosition,
-    onPositionChange,
-  ]);
+    return value.flatMap(collectCoordinates);
+  };
+  boundaryFeatures.forEach(feature =>
+    coordinates.push(...collectCoordinates(feature.geometry?.coordinates))
+  );
+  if (editablePosition)
+    coordinates.push([editablePosition[1], editablePosition[0]]);
+  const rawBounds = coordinates.length
+    ? coordinates.reduce(
+        (bounds, [lng, lat]) => ({
+          minLng: Math.min(bounds.minLng, lng),
+          maxLng: Math.max(bounds.maxLng, lng),
+          minLat: Math.min(bounds.minLat, lat),
+          maxLat: Math.max(bounds.maxLat, lat),
+        }),
+        {
+          minLng: Math.min(...coordinates.map(point => point[0])),
+          maxLng: Math.max(...coordinates.map(point => point[0])),
+          minLat: Math.min(...coordinates.map(point => point[1])),
+          maxLat: Math.max(...coordinates.map(point => point[1])),
+        }
+      )
+    : { minLng: 1.93, maxLng: 2.2, minLat: 7.05, maxLat: 7.32 };
+  const lngPadding = Math.max(
+    (rawBounds.maxLng - rawBounds.minLng) * 0.08,
+    0.004
+  );
+  const latPadding = Math.max(
+    (rawBounds.maxLat - rawBounds.minLat) * 0.08,
+    0.004
+  );
+  const bounds = {
+    minLng: rawBounds.minLng - lngPadding,
+    maxLng: rawBounds.maxLng + lngPadding,
+    minLat: rawBounds.minLat - latPadding,
+    maxLat: rawBounds.maxLat + latPadding,
+  };
+  const project = ([lng, lat]: [number, number]) => ({
+    x: ((lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * width,
+    y:
+      height -
+      ((lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * height,
+  });
+  const pathForGeometry = (geometry: any) => {
+    const polygons =
+      geometry?.type === "Polygon"
+        ? [geometry.coordinates]
+        : geometry?.type === "MultiPolygon"
+          ? geometry.coordinates
+          : [];
+    return polygons
+      .flatMap((polygon: any[]) => polygon)
+      .map((ring: any[]) => {
+        const points = ring.map((point: [number, number]) => project(point));
+        return points.length
+          ? `${points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(" ")} Z`
+          : "";
+      })
+      .join(" ");
+  };
+  const visibleReports = compact ? reports.slice(0, 6) : reports;
+  const handleMapClick = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (!onPositionChange) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * width;
+    const y = ((event.clientY - rect.top) / rect.height) * height;
+    const lng = bounds.minLng + (x / width) * (bounds.maxLng - bounds.minLng);
+    const lat =
+      bounds.minLat + ((height - y) / height) * (bounds.maxLat - bounds.minLat);
+    onPositionChange([lat, lng]);
+  };
   return (
     <div className={`map-card ${compact ? "map-compact" : ""}`}>
       <div className="map-toolbar">
@@ -435,17 +447,73 @@ function OperationalMap({
         </div>
         <div className="map-tools">
           <span className="map-source-label">
-            Fond masqué · données uniquement
+            Aucun fond · données uniquement
           </span>
         </div>
       </div>
       <div className="map-canvas">
-        <div
-          ref={mapNode}
-          className="osm-map"
+        <svg
+          className="data-map-svg"
+          viewBox={`0 0 ${width} ${height}`}
           role="img"
           aria-label="Carte des limites d’arrondissements et des dépôts terrain de Bohicon"
-        />
+          onClick={handleMapClick}
+        >
+          <rect width={width} height={height} className="data-map-surface" />
+          {boundaryFeatures.map((feature, index) => (
+            <path
+              key={`boundary-${index}`}
+              d={pathForGeometry(feature.geometry)}
+              className="data-map-boundary"
+            />
+          ))}
+          {visibleReports.map(report => {
+            const point = project([report.lng, report.lat]);
+            const isDepot = report.entityType === "depot";
+            return (
+              <circle
+                key={report.id}
+                cx={point.x}
+                cy={point.y}
+                r={compact ? 6 : 7}
+                className={isDepot ? "data-map-depot" : "data-map-report"}
+                tabIndex={0}
+                role="button"
+                aria-label={`${isDepot ? "Dépôt" : "Signalement"} ${report.location}`}
+                onClick={event => {
+                  event.stopPropagation();
+                  onSelect?.(report);
+                }}
+                onKeyDown={event => {
+                  if (event.key === "Enter" || event.key === " ")
+                    onSelect?.(report);
+                }}
+              >
+                <title>
+                  {report.id} · {report.location}
+                </title>
+              </circle>
+            );
+          })}
+          {editablePosition && (
+            <circle
+              cx={project([editablePosition[1], editablePosition[0]]).x}
+              cy={project([editablePosition[1], editablePosition[0]]).y}
+              r={10}
+              className="data-map-editable"
+            >
+              <title>Position du signalement</title>
+            </circle>
+          )}
+          <text x="18" y="28" className="data-map-label">
+            LIMITES ADMINISTRATIVES · BOHICON
+          </text>
+          {onPositionChange && (
+            <text x="18" y={height - 18} className="data-map-hint">
+              Cliquez sur la carte pour placer le signalement
+            </text>
+          )}
+        </svg>
         <div className="map-legend">
           <span>
             <i className="legend-dot legend-blue" />
@@ -457,14 +525,13 @@ function OperationalMap({
           </span>
           <span>
             <i className="legend-imported" />
-            Limites reçues
+            Limites d’arrondissements
           </span>
         </div>
       </div>
     </div>
   );
 }
-
 function PublicHome({
   onRole,
   state,
