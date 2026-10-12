@@ -473,8 +473,10 @@ function OperationalMap({
 
 function PublicHome({
   onRole,
+  state,
 }: {
   onRole: (role: Role, view?: ViewKey) => void;
+  state: DemoState;
 }) {
   const steps = [
     ["01", "Signaler", "Un citoyen documente un dépôt et le localise."],
@@ -558,10 +560,10 @@ function PublicHome({
               <span className="pulse-dot" /> Bohicon · fond OpenStreetMap
             </div>
             <OperationalMap
-              reports={[]}
-              hubs={[]}
-              interventions={[]}
-              importedLayers={[]}
+              reports={state.depots}
+              hubs={state.hubs}
+              interventions={state.interventions}
+              importedLayers={state.importedLayers}
               compact
             />
           </div>
@@ -4013,7 +4015,8 @@ export default function Home() {
         importedLayers: [...current.importedLayers, layer],
       };
     });
-  if (role === "public") return <PublicHome onRole={switchRole} />;
+  if (role === "public")
+    return <PublicHome onRole={switchRole} state={state} />;
   const renderView = () => {
     if (role === "citizen") {
       if (view === "report")
