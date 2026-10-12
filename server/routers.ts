@@ -54,6 +54,33 @@ const collectorProcedure = protectedProcedure.use(async ({ ctx, next }) => {
   return next();
 });
 const id = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
+
+async function invokeConfiguredAgent(params: Parameters<typeof invokeLLM>[0]) {
+  try {
+    return await invokeLLM(params);
+  } catch (primaryError) {
+    const base = process.env.OPENAI_API_BASE?.replace(/\/$/, "");
+    const key = process.env.OPENAI_API_KEY;
+    if (!base || !key) throw primaryError;
+    const response = await fetch(`${base}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: params.model ?? "gpt-5-mini",
+        messages: params.messages,
+        reasoning: params.reasoning,
+        max_completion_tokens: params.max_tokens ?? params.maxTokens ?? 700,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Proxy LLM indisponible (${response.status})`);
+    }
+    return (await response.json()) as Awaited<ReturnType<typeof invokeLLM>>;
+  }
+}
 const attachmentInput = z.object({
   id: z.string().max(96),
   originalName: z.string().min(1).max(255),
@@ -94,7 +121,7 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          const response = await invokeLLM({
+          const response = await invokeConfiguredAgent({
             model: "gpt-5-mini",
             max_tokens: 700,
             reasoning: { effort: "low" },
