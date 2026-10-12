@@ -3587,6 +3587,7 @@ function Analysis({ state }: { state: DemoState }) {
 function Intelligence({ state }: { state: DemoState }) {
   const [question, setQuestion] = useState("");
   const [lastQuestion, setLastQuestion] = useState("");
+  const [isAnswerExpanded, setIsAnswerExpanded] = useState(false);
   const [agentStatus, setAgentStatus] = useState<
     "ready" | "loading" | "fallback"
   >("ready");
@@ -3617,6 +3618,7 @@ function Intelligence({ state }: { state: DemoState }) {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion || askMutation.isPending) return;
     setLastQuestion(trimmedQuestion);
+    setIsAnswerExpanded(false);
     setAgentStatus("loading");
     try {
       const result = await askMutation.mutateAsync({
@@ -3645,6 +3647,8 @@ function Intelligence({ state }: { state: DemoState }) {
       setQuestion("");
     }
   };
+  const answerNeedsExpansion =
+    answer.length > 850 || answer.split(/\r?\n/).length > 10;
   const priorityReports = state.depots
     .filter(report => report.priority === "Haute")
     .slice(0, 3);
@@ -3690,7 +3694,9 @@ function Intelligence({ state }: { state: DemoState }) {
                 <span className="ai-message-label">
                   <Sparkles size={12} /> Réponse de l’agent IA
                 </span>
-                <div className="ai-response-content">
+                <div
+                  className={`ai-response-content${!isAnswerExpanded && answerNeedsExpansion ? " is-collapsed" : ""}`}
+                >
                   {answer.split(/\r?\n/).map((line, index) => {
                     const trimmed = line.trim();
                     if (!trimmed)
@@ -3720,6 +3726,20 @@ function Intelligence({ state }: { state: DemoState }) {
                     return <p key={index}>{trimmed}</p>;
                   })}
                 </div>
+                {answerNeedsExpansion && (
+                  <button
+                    className="ai-response-toggle"
+                    onClick={() => setIsAnswerExpanded(value => !value)}
+                    aria-expanded={isAnswerExpanded}
+                  >
+                    {isAnswerExpanded ? "Voir moins" : "Voir plus"}
+                    {isAnswerExpanded ? (
+                      <ChevronDown size={14} />
+                    ) : (
+                      <ChevronRight size={14} />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>
