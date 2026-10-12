@@ -647,18 +647,19 @@ function PublicHome({
               </span>
             </div>
           </div>
-          <div className="hero-visual">
+          <div className="hero-visual hero-illustration-wrap">
             <div className="hero-map-label">
-              <span className="pulse-dot" /> Bohicon · données terrain
-              uniquement
+              <span className="pulse-dot" /> Bohicon · agir, collecter,
+              valoriser
             </div>
-            <OperationalMap
-              reports={state.depots}
-              hubs={state.hubs}
-              interventions={state.interventions}
-              importedLayers={state.importedLayers}
-              compact
+            <img
+              className="hero-illustration"
+              src="/data/bohicon-clean-illustration.png"
+              alt="Habitants et collecteurs participant au tri et au recyclage des déchets"
             />
+            <div className="hero-illustration-caption">
+              Une mobilisation locale pour une ville plus propre.
+            </div>
           </div>
         </section>
         <section className="stat-strip" aria-label="Données disponibles">
