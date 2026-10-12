@@ -2495,11 +2495,20 @@ function MairieOverview({
     item => !["Traité", "Rejeté", "Doublon"].includes(item.status)
   ).length;
   const highDeposits = state.depots.filter(item => item.priority === "Haute");
-  const importantDeposits = state.depots.filter(item =>
-    ["Dépôt important", "Dépôt très important"].includes(
-      String(item.sourceProperties["Type de dépôt"] ?? "").trim()
+  const importantDeposits = state.depots
+    .filter(item =>
+      ["Dépôt important", "Dépôt très important"].includes(
+        String(item.sourceProperties["Type de dépôt"] ?? "").trim()
+      )
     )
-  );
+    .sort((a, b) => {
+      const typeOrder = (item: DepotSauvage) =>
+        String(item.sourceProperties["Type de dépôt"] ?? "").trim() ===
+        "Dépôt très important"
+          ? 0
+          : 1;
+      return typeOrder(a) - typeOrder(b);
+    });
   const countSource = (key: string, value: string) =>
     state.depots.filter(
       depot => String(depot.sourceProperties[key] ?? "").trim() === value
@@ -2839,15 +2848,6 @@ function MairieOverview({
               <span className="source-note-inline">Inventaire</span>
             </div>
           ))}
-          {!highDeposits.length && (
-            <div className="empty-state">
-              <Target size={20} />
-              <p>
-                Aucun dépôt important ou très important dans les données
-                disponibles.
-              </p>
-            </div>
-          )}
           <div className="priority-footer">
             <Sparkles size={14} /> 26 dépôts importants ou très importants dans
             le relevé ; la priorité opérationnelle doit être confirmée.
