@@ -12,3 +12,8 @@ Start with the Webdev skill's default-template guide. Platform login, storage, p
 `server/_core/publicConfig.ts` exposes only named public runtime values. Private keys stay server-side. The platform serves managed `/manus-storage/` assets; the application does not register a second proxy.
 
 Platform configuration is readable and editable through `webdev.config`. Default settings are initial values, not enforced constraints. The agent may modify the files, commands and configuration or follow the flexible guide for another stack.
+
+
+## Données et sécurité
+
+Le prototype public ne sert pas le fichier source brut. La couche `depots_sauvages_public.geojson` retire les métadonnées techniques de collecte et arrondit les coordonnées ; la source brute est conservée hors de `client/public`. Les rôles métier restent des rôles de démonstration locale tant que les procédures serveur et les tables métier ne sont pas activées.
