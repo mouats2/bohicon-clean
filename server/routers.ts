@@ -154,10 +154,15 @@ export const appRouter = router({
           let answer = llmText(response.choices?.[0]?.message?.content);
           if (!answer || typeof answer !== "string")
             throw new Error("Réponse IA vide");
-          if (response.choices?.[0]?.finish_reason === "length") {
+          for (
+            let continuationAttempt = 0;
+            continuationAttempt < 3 &&
+            response.choices?.[0]?.finish_reason === "length";
+            continuationAttempt++
+          ) {
             const continuation = await invokeConfiguredAgent({
               model: "gpt-5-mini",
-              max_tokens: 1400,
+              max_tokens: 1800,
               reasoning: { effort: "low" },
               messages: [
                 ...messages,

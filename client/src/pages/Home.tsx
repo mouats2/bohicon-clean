@@ -3587,7 +3587,7 @@ function Analysis({ state }: { state: DemoState }) {
 function Intelligence({ state }: { state: DemoState }) {
   const [question, setQuestion] = useState("");
   const [lastQuestion, setLastQuestion] = useState("");
-  const [isAnswerExpanded, setIsAnswerExpanded] = useState(false);
+  const [isAnswerExpanded, setIsAnswerExpanded] = useState(true);
   const [agentStatus, setAgentStatus] = useState<
     "ready" | "loading" | "fallback"
   >("ready");
@@ -3616,7 +3616,7 @@ function Intelligence({ state }: { state: DemoState }) {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion || askMutation.isPending) return;
     setLastQuestion(trimmedQuestion);
-    setIsAnswerExpanded(false);
+    setIsAnswerExpanded(true);
     setAgentStatus("loading");
     try {
       const result = await askMutation.mutateAsync({
