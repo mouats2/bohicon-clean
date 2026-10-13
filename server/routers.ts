@@ -81,6 +81,19 @@ async function invokeConfiguredAgent(params: Parameters<typeof invokeLLM>[0]) {
     return (await response.json()) as Awaited<ReturnType<typeof invokeLLM>>;
   }
 }
+const llmText = (
+  content: Awaited<
+    ReturnType<typeof invokeLLM>
+  >["choices"][number]["message"]["content"]
+) =>
+  Array.isArray(content)
+    ? content
+        .map(part =>
+          typeof part === "string" ? part : "text" in part ? part.text : ""
+        )
+        .join("\n")
+    : content;
+
 const attachmentInput = z.object({
   id: z.string().max(96),
   originalName: z.string().min(1).max(255),
@@ -121,36 +134,47 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          const response = await invokeConfiguredAgent({
+          const messages = [
+            {
+              role: "system" as const,
+              content:
+                "Tu es l’agent IA d’aide à la décision de BOHICON CLEAN. Réponds en français, de façon concise et opérationnelle. Utilise exclusivement les statistiques fournies dans le contexte. N’invente aucun site, volume, date, coût, itinéraire ou résultat. Si une information manque, dis-le clairement. Distingue toujours constat source, interprétation prudente et action proposée. Termine toujours par une conclusion complète et une phrase rappelant que la décision appartient à la mairie. Ne coupe jamais une phrase en fin de réponse.",
+            },
+            {
+              role: "user" as const,
+              content: `Question de la mairie : ${input.question}\n\nContexte vérifié du relevé : ${JSON.stringify(input.context)}`,
+            },
+          ];
+          let response = await invokeConfiguredAgent({
             model: "gpt-5-mini",
-            max_tokens: 1400,
+            max_tokens: 2400,
             reasoning: { effort: "low" },
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Tu es l’agent IA d’aide à la décision de BOHICON CLEAN. Réponds en français, de façon concise et opérationnelle. Utilise exclusivement les statistiques fournies dans le contexte. N’invente aucun site, volume, date, coût, itinéraire ou résultat. Si une information manque, dis-le clairement. Distingue toujours constat source, interprétation prudente et action proposée. Termine par une phrase rappelant que la décision appartient à la mairie.",
-              },
-              {
-                role: "user",
-                content: `Question de la mairie : ${input.question}\n\nContexte vérifié du relevé : ${JSON.stringify(input.context)}`,
-              },
-            ],
+            messages,
           });
-          const content = response.choices?.[0]?.message?.content;
-          const answer = Array.isArray(content)
-            ? content
-                .map(part =>
-                  typeof part === "string"
-                    ? part
-                    : "text" in part
-                      ? part.text
-                      : ""
-                )
-                .join("\n")
-            : content;
+          let answer = llmText(response.choices?.[0]?.message?.content);
           if (!answer || typeof answer !== "string")
             throw new Error("Réponse IA vide");
+          if (response.choices?.[0]?.finish_reason === "length") {
+            const continuation = await invokeConfiguredAgent({
+              model: "gpt-5-mini",
+              max_tokens: 1400,
+              reasoning: { effort: "low" },
+              messages: [
+                ...messages,
+                { role: "assistant" as const, content: answer },
+                {
+                  role: "user" as const,
+                  content:
+                    "La réponse précédente a été coupée. Continue exactement à partir de la dernière phrase, sans répéter le contenu déjà fourni, puis termine par une conclusion complète et le rappel que la décision appartient à la mairie.",
+                },
+              ],
+            });
+            const continuationText = llmText(
+              continuation.choices?.[0]?.message?.content
+            );
+            if (continuationText) answer = `${answer}\n\n${continuationText}`;
+            response = continuation;
+          }
           return { answer, source: "agent-ia", model: response.model };
         } catch (error) {
           console.error("[Intelligence] Agent IA indisponible", error);

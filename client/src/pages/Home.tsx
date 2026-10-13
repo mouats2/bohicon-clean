@@ -3750,7 +3750,11 @@ function Intelligence({ state }: { state: DemoState }) {
               value={question}
               onChange={e => setQuestion(e.target.value)}
               onKeyDown={e => e.key === "Enter" && ask()}
-              placeholder="Interroger les données terrain…"
+              placeholder={
+                askMutation.isPending
+                  ? "Réflexion en cours…"
+                  : "Interroger les données terrain…"
+              }
               disabled={askMutation.isPending}
             />
             <button
