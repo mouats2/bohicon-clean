@@ -72,7 +72,7 @@ async function invokeConfiguredAgent(params: Parameters<typeof invokeLLM>[0]) {
         model: params.model ?? "gpt-5-mini",
         messages: params.messages,
         reasoning: params.reasoning,
-        max_completion_tokens: params.max_tokens ?? params.maxTokens ?? 700,
+        max_completion_tokens: params.max_tokens ?? params.maxTokens ?? 1400,
       }),
     });
     if (!response.ok) {
@@ -123,7 +123,7 @@ export const appRouter = router({
         try {
           const response = await invokeConfiguredAgent({
             model: "gpt-5-mini",
-            max_tokens: 700,
+            max_tokens: 1400,
             reasoning: { effort: "low" },
             messages: [
               {
