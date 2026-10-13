@@ -3611,9 +3611,7 @@ function Intelligence({ state }: { state: DemoState }) {
   const established =
     countSource("Ancienneté estimée", "6 mois à 1 an") +
     countSource("Ancienneté estimée", "Plus d’un an");
-  const [answer, setAnswer] = useState(
-    `Agent IA prêt : ${state.depots.length} dépôts terrain sont disponibles. Posez une question sur les priorités, les nuisances ou les déchets dominants.`
-  );
+  const [answer, setAnswer] = useState("");
   const ask = async () => {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion || askMutation.isPending) return;
@@ -3690,57 +3688,61 @@ function Intelligence({ state }: { state: DemoState }) {
                   <p>{lastQuestion}</p>
                 </div>
               )}
-              <div className="ai-message ai-message-assistant">
-                <span className="ai-message-label">
-                  <Sparkles size={12} /> Réponse de l’agent IA
-                </span>
-                <div
-                  className={`ai-response-content${!isAnswerExpanded && answerNeedsExpansion ? " is-collapsed" : ""}`}
-                >
-                  {answer.split(/\r?\n/).map((line, index) => {
-                    const trimmed = line.trim();
-                    if (!trimmed)
-                      return <div className="ai-response-space" key={index} />;
-                    if (
-                      /^(Constat|Interprétation prudente|Actions proposées|Conclusion|Limites|Décision)/i.test(
-                        trimmed
-                      )
-                    ) {
-                      return <h4 key={index}>{trimmed.replace(/:$/, "")}</h4>;
-                    }
-                    const step = trimmed.match(/^(\d+)\.\s+(.*)$/);
-                    if (step)
-                      return (
-                        <div className="ai-response-step" key={index}>
-                          <b>{step[1]}</b>
-                          <span>{step[2]}</span>
-                        </div>
-                      );
-                    if (trimmed.startsWith("- ") || trimmed.startsWith("• "))
-                      return (
-                        <div className="ai-response-bullet" key={index}>
-                          <i />
-                          {trimmed.slice(2)}
-                        </div>
-                      );
-                    return <p key={index}>{trimmed}</p>;
-                  })}
-                </div>
-                {answerNeedsExpansion && (
-                  <button
-                    className="ai-response-toggle"
-                    onClick={() => setIsAnswerExpanded(value => !value)}
-                    aria-expanded={isAnswerExpanded}
+              {answer && (
+                <div className="ai-message ai-message-assistant">
+                  <span className="ai-message-label">
+                    <Sparkles size={12} /> Réponse de l’agent IA
+                  </span>
+                  <div
+                    className={`ai-response-content${!isAnswerExpanded && answerNeedsExpansion ? " is-collapsed" : ""}`}
                   >
-                    {isAnswerExpanded ? "Voir moins" : "Voir plus"}
-                    {isAnswerExpanded ? (
-                      <ChevronDown size={14} />
-                    ) : (
-                      <ChevronRight size={14} />
-                    )}
-                  </button>
-                )}
-              </div>
+                    {answer.split(/\r?\n/).map((line, index) => {
+                      const trimmed = line.trim();
+                      if (!trimmed)
+                        return (
+                          <div className="ai-response-space" key={index} />
+                        );
+                      if (
+                        /^(Constat|Interprétation prudente|Actions proposées|Conclusion|Limites|Décision)/i.test(
+                          trimmed
+                        )
+                      ) {
+                        return <h4 key={index}>{trimmed.replace(/:$/, "")}</h4>;
+                      }
+                      const step = trimmed.match(/^(\d+)\.\s+(.*)$/);
+                      if (step)
+                        return (
+                          <div className="ai-response-step" key={index}>
+                            <b>{step[1]}</b>
+                            <span>{step[2]}</span>
+                          </div>
+                        );
+                      if (trimmed.startsWith("- ") || trimmed.startsWith("• "))
+                        return (
+                          <div className="ai-response-bullet" key={index}>
+                            <i />
+                            {trimmed.slice(2)}
+                          </div>
+                        );
+                      return <p key={index}>{trimmed}</p>;
+                    })}
+                  </div>
+                  {answerNeedsExpansion && (
+                    <button
+                      className="ai-response-toggle"
+                      onClick={() => setIsAnswerExpanded(value => !value)}
+                      aria-expanded={isAnswerExpanded}
+                    >
+                      {isAnswerExpanded ? "Voir moins" : "Voir plus"}
+                      {isAnswerExpanded ? (
+                        <ChevronDown size={14} />
+                      ) : (
+                        <ChevronRight size={14} />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="ai-input">
