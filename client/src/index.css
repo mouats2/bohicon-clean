@@ -4309,3 +4309,372 @@ a {
   color: #013e3f;
   text-decoration: underline;
 }
+
+/* Mobile polish: fluid layouts, comfortable touch targets, and no horizontal overflow. */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+button,
+a,
+select,
+input,
+textarea {
+  touch-action: manipulation;
+}
+@media (max-width: 680px) {
+  .public-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    min-height: 64px;
+    padding: 10px 14px;
+    background: rgba(247, 249, 244, 0.94);
+    backdrop-filter: blur(14px);
+  }
+  .public-header .brand {
+    min-width: 0;
+    gap: 8px;
+  }
+  .public-header .brand-caption {
+    display: none;
+  }
+  .public-header .brand-name {
+    font-size: 12px;
+  }
+  .public-actions {
+    align-items: center;
+    gap: 4px;
+  }
+  .public-actions .button-primary {
+    min-height: 40px;
+    padding: 0 11px;
+    font-size: 10px;
+  }
+  .public-mobile-menu summary {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .public-mobile-links {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    min-width: 0;
+    padding: 8px;
+  }
+  .public-mobile-links a {
+    min-height: 46px;
+    font-size: 13px;
+  }
+  .hero-section {
+    min-height: 0;
+    padding: 34px 15px 38px;
+    gap: 28px;
+  }
+  .hero-copy h1 {
+    max-width: 100%;
+    margin: 14px 0 15px;
+    font-size: clamp(38px, 12vw, 52px);
+    line-height: 0.99;
+  }
+  .hero-lead {
+    max-width: 38rem;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin-top: 22px;
+  }
+  .hero-actions .button {
+    width: 100%;
+  }
+  .hero-visual,
+  .hero-illustration-wrap {
+    min-height: 0;
+    padding: 9px;
+  }
+  .hero-illustration {
+    max-height: none;
+    width: 100%;
+  }
+  .stat-strip {
+    gap: 0;
+  }
+  .stat-strip strong {
+    font-size: 18px;
+  }
+  .editorial-section,
+  .journey-section,
+  .about-section,
+  .split-section {
+    padding-top: 46px;
+    padding-bottom: 46px;
+  }
+  .step-card,
+  .journey-card {
+    min-height: 0;
+  }
+  .app-shell {
+    display: block;
+    min-height: 100svh;
+  }
+  .main-column {
+    width: 100%;
+    min-width: 0;
+  }
+  .app-topbar {
+    min-height: 60px;
+    height: auto;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .topbar-context {
+    min-width: 0;
+    flex: 1;
+  }
+  .topbar-context strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar-kicker {
+    font-size: 8px;
+  }
+  .topbar-actions {
+    flex: 0 0 auto;
+  }
+  .notification-button {
+    display: none;
+  }
+  .role-switch {
+    max-width: 108px;
+    height: 40px;
+    padding: 0 7px;
+  }
+  .role-switch select {
+    max-width: 74px;
+    min-height: 36px;
+  }
+  .menu-button,
+  .mobile-close,
+  .icon-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .app-content {
+    width: 100%;
+    padding: 18px 12px 40px;
+  }
+  .workspace,
+  .mairie-workspace,
+  .narrow-workspace {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+  .page-intro,
+  .section-heading {
+    gap: 13px;
+    margin-bottom: 16px;
+  }
+  .page-intro h1,
+  .section-heading h1,
+  .section-heading h2 {
+    overflow-wrap: anywhere;
+    font-size: clamp(25px, 8vw, 34px);
+    line-height: 1.05;
+  }
+  .page-intro p,
+  .section-heading p {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .intro-actions,
+  .form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 8px;
+  }
+  .intro-actions .button,
+  .form-actions .button,
+  .form-actions .text-button {
+    width: 100%;
+    min-height: 44px;
+    margin-right: 0;
+  }
+  .form-actions .text-button {
+    order: 2;
+  }
+  .panel,
+  .form-panel,
+  .mairie-data-brief {
+    min-width: 0;
+    padding: 15px;
+    border-radius: 13px;
+  }
+  .panel-header {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .panel-header h3 {
+    overflow-wrap: anywhere;
+  }
+  .kpi-grid,
+  .citizen-kpis,
+  .mairie-kpis {
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .kpi-card {
+    min-width: 0;
+    min-height: 112px;
+    padding: 12px;
+  }
+  .kpi-label,
+  .kpi-detail {
+    overflow-wrap: anywhere;
+  }
+  .kpi-value {
+    font-size: clamp(20px, 7vw, 27px);
+  }
+  .content-grid,
+  .dashboard-grid,
+  .ai-layout,
+  .training-layout,
+  .admin-grid,
+  .analysis-layout {
+    gap: 10px;
+  }
+  .report-row {
+    grid-template-columns: 30px minmax(0, 1fr) 16px;
+    gap: 8px;
+    min-height: 62px;
+  }
+  .report-row > .status {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .map-card {
+    min-width: 0;
+  }
+  .map-toolbar {
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 12px 13px;
+  }
+  .map-title {
+    min-width: 0;
+  }
+  .map-title strong {
+    overflow-wrap: anywhere;
+  }
+  .map-tools,
+  .map-legend {
+    flex-wrap: wrap;
+  }
+  .data-map-svg,
+  .map-compact .data-map-svg,
+  .map-canvas svg,
+  .map-compact .map-canvas svg {
+    height: min(62vw, 270px);
+    min-height: 210px;
+  }
+  .filter-bar {
+    align-items: stretch;
+    padding: 8px;
+    gap: 6px;
+  }
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar .button {
+    min-height: 42px;
+  }
+  .table-scroll {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .table-panel table {
+    min-width: 680px;
+  }
+  .choice-button,
+  .severity-button,
+  .hub-option {
+    min-height: 44px;
+  }
+  .ai-chat-panel {
+    min-height: 0;
+  }
+  .ai-answer {
+    margin: 14px 0;
+    padding: 12px;
+  }
+  .ai-message {
+    padding: 12px;
+  }
+  .ai-input {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    padding: 7px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--shadow-small);
+  }
+  .ai-input input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .ai-input .button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .recommendation-card h3 {
+    overflow-wrap: anywhere;
+  }
+  .mairie-data-brief-grid {
+    gap: 8px;
+  }
+  .mairie-data-brief-grid article {
+    min-height: 108px;
+    padding: 12px;
+  }
+  .mairie-data-brief-grid strong {
+    font-size: 22px;
+  }
+}
+@media (max-width: 390px) {
+  .public-header .button-primary {
+    max-width: 104px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kpi-card {
+    padding: 10px;
+  }
+  .kpi-value {
+    font-size: 20px;
+  }
+  .app-content {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
