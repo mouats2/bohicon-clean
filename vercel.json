@@ -1,0 +1,7 @@
+{
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build:static",
+  "outputDirectory": "dist/public",
+  "rewrites": [{ "source": "/((?!assets/|data/|api/).*)", "destination": "/index.html" }]
+}
